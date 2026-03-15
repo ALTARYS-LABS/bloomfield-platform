@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: #0D1117;
+  --color-bg-widget: #161B22;
+  --color-bg-header: #1C2333;
+  --color-border: #30363D;
+  --color-text-primary: #E6EDF3;
+  --color-text-secondary: #8B949E;
+  --color-accent: #2563EB;
+  --color-gain: #22C55E;
+  --color-loss: #EF4444;
+  --color-gold: #D4A843;
+  --color-altarys-orange: #D4810A;
+  --color-landing-bg: #0A0E27;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@utility flash-green {
+  animation: flashGreen 300ms ease-out;
+}
+@utility flash-red {
+  animation: flashRed 300ms ease-out;
+}
+
+@keyframes flashGreen {
+  0% { background-color: rgba(34, 197, 94, 0.3); }
+  100% { background-color: transparent; }
+}
+@keyframes flashRed {
+  0% { background-color: rgba(239, 68, 68, 0.3); }
+  100% { background-color: transparent; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@utility pulse-dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@utility ticker-scroll {
+  animation: ticker-scroll 30s linear infinite;
+}
+
+.react-grid-item > .react-resizable-handle::after {
+  border-color: var(--color-text-secondary) !important;
+}
