@@ -9,6 +9,20 @@ interface Props {
 
 type SortKey = 'ticker' | 'price' | 'changePercent' | 'volume';
 
+interface SortIconProps {
+  k: SortKey;
+  sortKey: SortKey;
+  sortAsc: boolean;
+}
+
+function SortIcon({ k, sortKey, sortAsc }: SortIconProps) {
+  return (
+    <span className="ml-1 text-text-secondary">
+      {sortKey === k ? (sortAsc ? '▲' : '▼') : ''}
+    </span>
+  );
+}
+
 export default function MarketTable({ quotes, selectedTicker, onSelectTicker }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('ticker');
   const [sortAsc, setSortAsc] = useState(true);
@@ -26,11 +40,10 @@ export default function MarketTable({ quotes, selectedTicker, onSelectTicker }: 
       }
       prevPrices.current.set(q.ticker, q.price);
     });
-    if (newFlashes.size > 0) {
-      setFlashes(newFlashes);
-      const t = setTimeout(() => setFlashes(new Map()), 300);
-      return () => clearTimeout(t);
-    }
+    if (newFlashes.size === 0) return;
+    const t1 = setTimeout(() => setFlashes(newFlashes), 0);
+    const t2 = setTimeout(() => setFlashes(new Map()), 300);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [items]);
 
   const sorted = [...items].sort((a, b) => {
@@ -49,12 +62,6 @@ export default function MarketTable({ quotes, selectedTicker, onSelectTicker }: 
     else { setSortKey(key); setSortAsc(true); }
   };
 
-  const SortIcon = ({ k }: { k: SortKey }) => (
-    <span className="ml-1 text-text-secondary">
-      {sortKey === k ? (sortAsc ? '▲' : '▼') : ''}
-    </span>
-  );
-
   return (
     <div className="h-full flex flex-col">
       <div className="drag-handle bg-bg-header px-3 py-2 text-xs font-semibold text-text-secondary uppercase tracking-wider border-b border-border rounded-t-lg cursor-grab">
@@ -65,17 +72,17 @@ export default function MarketTable({ quotes, selectedTicker, onSelectTicker }: 
           <thead className="sticky top-0 bg-bg-widget">
             <tr className="text-text-secondary text-[10px] md:text-xs">
               <th className="text-left px-2 md:px-3 py-2 cursor-pointer" onClick={() => handleSort('ticker')}>
-                Ticker<SortIcon k="ticker" />
+                Ticker<SortIcon k="ticker" sortKey={sortKey} sortAsc={sortAsc} />
               </th>
               <th className="text-left px-2 md:px-3 py-2 hidden sm:table-cell">Nom</th>
               <th className="text-right px-2 md:px-3 py-2 cursor-pointer" onClick={() => handleSort('price')}>
-                Dernier<SortIcon k="price" />
+                Dernier<SortIcon k="price" sortKey={sortKey} sortAsc={sortAsc} />
               </th>
               <th className="text-right px-2 md:px-3 py-2 cursor-pointer" onClick={() => handleSort('changePercent')}>
-                Var%<SortIcon k="changePercent" />
+                Var%<SortIcon k="changePercent" sortKey={sortKey} sortAsc={sortAsc} />
               </th>
               <th className="text-right px-2 md:px-3 py-2 cursor-pointer hidden md:table-cell" onClick={() => handleSort('volume')}>
-                Volume<SortIcon k="volume" />
+                Volume<SortIcon k="volume" sortKey={sortKey} sortAsc={sortAsc} />
               </th>
               <th className="text-right px-2 md:px-3 py-2 hidden lg:table-cell">High</th>
               <th className="text-right px-2 md:px-3 py-2 hidden lg:table-cell">Low</th>

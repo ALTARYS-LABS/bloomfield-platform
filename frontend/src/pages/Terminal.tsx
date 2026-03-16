@@ -54,12 +54,11 @@ export default function Terminal() {
 
   const handleSelectTicker = useCallback((ticker: string) => {
     setSelectedTicker(ticker);
-    fetchHistory(ticker).then(setHistory);
-  }, [fetchHistory]);
+  }, []);
 
   useEffect(() => {
     fetchHistory(selectedTicker).then(setHistory);
-  }, []);
+  }, [fetchHistory, selectedTicker]);
 
   const widgetClass = "bg-bg-widget rounded-lg border border-border overflow-hidden";
 
