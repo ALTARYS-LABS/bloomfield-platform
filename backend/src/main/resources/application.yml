@@ -10,6 +10,11 @@ market:
     composite-base: 234.56
     brvm10-base: 178.23
 
+app:
+  cors:
+    allowed-origins:
+      - "http://localhost:5173"
+
 logging:
   level:
     root: INFO
