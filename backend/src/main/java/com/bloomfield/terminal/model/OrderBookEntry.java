@@ -3,10 +3,6 @@ package com.bloomfield.terminal.model;
 import java.math.BigDecimal;
 import java.util.List;
 
-public record OrderBookEntry(
-        String ticker,
-        List<Level> bids,
-        List<Level> asks
-) {
-    public record Level(BigDecimal price, int quantity) {}
+public record OrderBookEntry(String ticker, List<Level> bids, List<Level> asks) {
+  public record Level(BigDecimal price, int quantity) {}
 }
