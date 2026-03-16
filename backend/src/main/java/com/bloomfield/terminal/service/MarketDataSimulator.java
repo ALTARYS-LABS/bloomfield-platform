@@ -7,6 +7,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -14,17 +16,21 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class MarketDataSimulator {
 
+    private static final BigDecimal COMPOSITE_BASE = BigDecimal.valueOf(234.56);
+    private static final BigDecimal BRVM10_BASE = BigDecimal.valueOf(178.23);
+    private static final BigDecimal ONE_HUNDRED = BigDecimal.valueOf(100);
+
     private final SimpMessagingTemplate messagingTemplate;
     private final Map<String, TickerState> tickers = new ConcurrentHashMap<>();
-    private final List<Double> compositeHistory = new ArrayList<>();
-    private final List<Double> brvm10History = new ArrayList<>();
-    private double compositeValue = 234.56;
-    private double brvm10Value = 178.23;
+    private final List<BigDecimal> compositeHistory = new ArrayList<>();
+    private final List<BigDecimal> brvm10History = new ArrayList<>();
+    private BigDecimal compositeValue = BigDecimal.valueOf(234.56);
+    private BigDecimal brvm10Value = BigDecimal.valueOf(178.23);
 
     public record TickerState(
-            String name, String sector, double openPrice,
-            double price, double high, double low, long volume,
-            double marketCap, double per, double dividendYield
+            String name, String sector, BigDecimal openPrice,
+            BigDecimal price, BigDecimal high, BigDecimal low, long volume,
+            BigDecimal marketCap, BigDecimal per, BigDecimal dividendYield
     ) {}
 
     public MarketDataSimulator(SimpMessagingTemplate messagingTemplate) {
@@ -47,8 +53,9 @@ public class MarketDataSimulator {
 
     private void addTicker(String ticker, String name, String sector, double price,
                            double marketCap, double per, double dividendYield) {
-        tickers.put(ticker, new TickerState(name, sector, price, price, price, price, 0,
-                marketCap, per, dividendYield));
+        BigDecimal bdPrice = BigDecimal.valueOf(price).setScale(0, RoundingMode.HALF_UP);
+        tickers.put(ticker, new TickerState(name, sector, bdPrice, bdPrice, bdPrice, bdPrice, 0,
+                BigDecimal.valueOf(marketCap), BigDecimal.valueOf(per), BigDecimal.valueOf(dividendYield)));
     }
 
     @Scheduled(fixedDelayString = "#{T(java.util.concurrent.ThreadLocalRandom).current().nextLong(1000, 2001)}")
@@ -60,13 +67,14 @@ public class MarketDataSimulator {
             String ticker = entry.getKey();
             TickerState state = entry.getValue();
 
-            double variation = 1.0 + (random.nextDouble(-0.003, 0.003));
-            double newPrice = Math.round(state.price() * variation * 100.0) / 100.0;
-            double newHigh = Math.max(state.high(), newPrice);
-            double newLow = Math.min(state.low(), newPrice);
+            BigDecimal variation = BigDecimal.ONE.add(BigDecimal.valueOf(random.nextDouble(-0.003, 0.003)));
+            BigDecimal newPrice = state.price().multiply(variation).setScale(0, RoundingMode.HALF_UP);
+            BigDecimal newHigh = state.high().max(newPrice);
+            BigDecimal newLow = state.low().min(newPrice);
             long newVolume = state.volume() + random.nextLong(10, 500);
-            double change = newPrice - state.openPrice();
-            double changePct = (change / state.openPrice()) * 100.0;
+            BigDecimal change = newPrice.subtract(state.openPrice()).setScale(0, RoundingMode.HALF_UP);
+            BigDecimal changePct = change.multiply(ONE_HUNDRED)
+                    .divide(state.openPrice(), 2, RoundingMode.HALF_UP);
 
             TickerState updated = new TickerState(
                     state.name(), state.sector(), state.openPrice(),
@@ -78,8 +86,7 @@ public class MarketDataSimulator {
             quotes.add(new Quote(
                     ticker, state.name(), state.sector(),
                     newPrice, state.openPrice(), newHigh, newLow, state.openPrice(),
-                    newVolume, Math.round(change * 100.0) / 100.0,
-                    Math.round(changePct * 100.0) / 100.0,
+                    newVolume, change, changePct,
                     System.currentTimeMillis()
             ));
         }
@@ -92,17 +99,17 @@ public class MarketDataSimulator {
         List<OrderBookEntry> books = new ArrayList<>();
 
         for (var entry : tickers.entrySet()) {
-            double price = entry.getValue().price();
+            BigDecimal price = entry.getValue().price();
             List<OrderBookEntry.Level> bids = new ArrayList<>();
             List<OrderBookEntry.Level> asks = new ArrayList<>();
 
             for (int i = 0; i < 5; i++) {
-                double spread = price * 0.001 * (i + 1);
+                BigDecimal spread = price.multiply(BigDecimal.valueOf(0.001 * (i + 1)));
                 bids.add(new OrderBookEntry.Level(
-                        Math.round((price - spread) * 100.0) / 100.0,
+                        price.subtract(spread).setScale(0, RoundingMode.HALF_UP),
                         random.nextInt(50, 2000)));
                 asks.add(new OrderBookEntry.Level(
-                        Math.round((price + spread) * 100.0) / 100.0,
+                        price.add(spread).setScale(0, RoundingMode.HALF_UP),
                         random.nextInt(50, 2000)));
             }
             books.add(new OrderBookEntry(entry.getKey(), bids, asks));
@@ -114,24 +121,29 @@ public class MarketDataSimulator {
     public void publishIndices() {
         var random = ThreadLocalRandom.current();
 
-        compositeValue *= 1.0 + random.nextDouble(-0.001, 0.001);
-        compositeValue = Math.round(compositeValue * 100.0) / 100.0;
+        BigDecimal compositeVariation = BigDecimal.ONE.add(BigDecimal.valueOf(random.nextDouble(-0.001, 0.001)));
+        compositeValue = compositeValue.multiply(compositeVariation).setScale(2, RoundingMode.HALF_UP);
         compositeHistory.add(compositeValue);
         if (compositeHistory.size() > 20) compositeHistory.removeFirst();
 
-        brvm10Value *= 1.0 + random.nextDouble(-0.001, 0.001);
-        brvm10Value = Math.round(brvm10Value * 100.0) / 100.0;
+        BigDecimal brvm10Variation = BigDecimal.ONE.add(BigDecimal.valueOf(random.nextDouble(-0.001, 0.001)));
+        brvm10Value = brvm10Value.multiply(brvm10Variation).setScale(2, RoundingMode.HALF_UP);
         brvm10History.add(brvm10Value);
         if (brvm10History.size() > 20) brvm10History.removeFirst();
 
-        double compositeChange = compositeValue - 234.56;
-        double brvm10Change = brvm10Value - 178.23;
+        BigDecimal compositeChange = compositeValue.subtract(COMPOSITE_BASE).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal brvm10Change = brvm10Value.subtract(BRVM10_BASE).setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal compositePct = compositeChange.multiply(ONE_HUNDRED)
+                .divide(COMPOSITE_BASE, 2, RoundingMode.HALF_UP);
+        BigDecimal brvm10Pct = brvm10Change.multiply(ONE_HUNDRED)
+                .divide(BRVM10_BASE, 2, RoundingMode.HALF_UP);
 
         List<MarketIndex> indices = List.of(
-                new MarketIndex("BRVM Composite", compositeValue, Math.round(compositeChange * 100.0) / 100.0,
-                        Math.round((compositeChange / 234.56) * 10000.0) / 100.0, new ArrayList<>(compositeHistory)),
-                new MarketIndex("BRVM 10", brvm10Value, Math.round(brvm10Change * 100.0) / 100.0,
-                        Math.round((brvm10Change / 178.23) * 10000.0) / 100.0, new ArrayList<>(brvm10History))
+                new MarketIndex("BRVM Composite", compositeValue, compositeChange,
+                        compositePct, new ArrayList<>(compositeHistory)),
+                new MarketIndex("BRVM 10", brvm10Value, brvm10Change,
+                        brvm10Pct, new ArrayList<>(brvm10History))
         );
         messagingTemplate.convertAndSend("/topic/brvm/indices", indices);
     }
@@ -142,22 +154,27 @@ public class MarketDataSimulator {
 
         var random = new Random(ticker.hashCode());
         List<Map<String, Object>> history = new ArrayList<>();
-        double price = state.openPrice() * 0.95;
+        BigDecimal price = state.openPrice().multiply(BigDecimal.valueOf(0.95)).setScale(0, RoundingMode.HALF_UP);
         long now = System.currentTimeMillis();
 
         for (int i = days; i >= 0; i--) {
-            double open = price;
-            double close = open * (1.0 + random.nextDouble(-0.02, 0.02));
-            double high = Math.max(open, close) * (1.0 + random.nextDouble(0, 0.01));
-            double low = Math.min(open, close) * (1.0 - random.nextDouble(0, 0.01));
+            BigDecimal open = price;
+            BigDecimal close = open.multiply(BigDecimal.ONE.add(BigDecimal.valueOf(random.nextDouble(-0.02, 0.02))))
+                    .setScale(0, RoundingMode.HALF_UP);
+            BigDecimal high = open.max(close)
+                    .multiply(BigDecimal.ONE.add(BigDecimal.valueOf(random.nextDouble(0, 0.01))))
+                    .setScale(0, RoundingMode.HALF_UP);
+            BigDecimal low = open.min(close)
+                    .multiply(BigDecimal.ONE.subtract(BigDecimal.valueOf(random.nextDouble(0, 0.01))))
+                    .setScale(0, RoundingMode.HALF_UP);
             long volume = random.nextLong(1000, 50000);
 
             Map<String, Object> candle = new LinkedHashMap<>();
             candle.put("time", (now - (long) i * 86400000L) / 1000);
-            candle.put("open", Math.round(open * 100.0) / 100.0);
-            candle.put("high", Math.round(high * 100.0) / 100.0);
-            candle.put("low", Math.round(low * 100.0) / 100.0);
-            candle.put("close", Math.round(close * 100.0) / 100.0);
+            candle.put("open", open);
+            candle.put("high", high);
+            candle.put("low", low);
+            candle.put("close", close);
             candle.put("volume", volume);
 
             history.add(candle);

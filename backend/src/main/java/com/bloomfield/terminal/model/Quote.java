@@ -1,16 +1,18 @@
 package com.bloomfield.terminal.model;
 
+import java.math.BigDecimal;
+
 public record Quote(
         String ticker,
         String name,
         String sector,
-        double price,
-        double open,
-        double high,
-        double low,
-        double close,
+        BigDecimal price,
+        BigDecimal open,
+        BigDecimal high,
+        BigDecimal low,
+        BigDecimal close,
         long volume,
-        double change,
-        double changePercent,
+        BigDecimal change,
+        BigDecimal changePercent,
         long timestamp
 ) {}
