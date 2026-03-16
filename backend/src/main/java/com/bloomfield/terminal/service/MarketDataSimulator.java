@@ -53,7 +53,7 @@ public class MarketDataSimulator {
 
     private void addTicker(String ticker, String name, String sector, double price,
                            double marketCap, double per, double dividendYield) {
-        BigDecimal bdPrice = BigDecimal.valueOf(price).setScale(0, RoundingMode.HALF_UP);
+        BigDecimal bdPrice = BigDecimal.valueOf(price).setScale(2, RoundingMode.HALF_UP);
         tickers.put(ticker, new TickerState(name, sector, bdPrice, bdPrice, bdPrice, bdPrice, 0,
                 BigDecimal.valueOf(marketCap), BigDecimal.valueOf(per), BigDecimal.valueOf(dividendYield)));
     }
@@ -68,11 +68,11 @@ public class MarketDataSimulator {
             TickerState state = entry.getValue();
 
             BigDecimal variation = BigDecimal.ONE.add(BigDecimal.valueOf(random.nextDouble(-0.003, 0.003)));
-            BigDecimal newPrice = state.price().multiply(variation).setScale(0, RoundingMode.HALF_UP);
+            BigDecimal newPrice = state.price().multiply(variation).setScale(2, RoundingMode.HALF_UP);
             BigDecimal newHigh = state.high().max(newPrice);
             BigDecimal newLow = state.low().min(newPrice);
             long newVolume = state.volume() + random.nextLong(10, 500);
-            BigDecimal change = newPrice.subtract(state.openPrice()).setScale(0, RoundingMode.HALF_UP);
+            BigDecimal change = newPrice.subtract(state.openPrice()).setScale(2, RoundingMode.HALF_UP);
             BigDecimal changePct = change.multiply(ONE_HUNDRED)
                     .divide(state.openPrice(), 2, RoundingMode.HALF_UP);
 
@@ -106,10 +106,10 @@ public class MarketDataSimulator {
             for (int i = 0; i < 5; i++) {
                 BigDecimal spread = price.multiply(BigDecimal.valueOf(0.001 * (i + 1)));
                 bids.add(new OrderBookEntry.Level(
-                        price.subtract(spread).setScale(0, RoundingMode.HALF_UP),
+                        price.subtract(spread).setScale(2, RoundingMode.HALF_UP),
                         random.nextInt(50, 2000)));
                 asks.add(new OrderBookEntry.Level(
-                        price.add(spread).setScale(0, RoundingMode.HALF_UP),
+                        price.add(spread).setScale(2, RoundingMode.HALF_UP),
                         random.nextInt(50, 2000)));
             }
             books.add(new OrderBookEntry(entry.getKey(), bids, asks));
@@ -154,19 +154,19 @@ public class MarketDataSimulator {
 
         var random = new Random(ticker.hashCode());
         List<Map<String, Object>> history = new ArrayList<>();
-        BigDecimal price = state.openPrice().multiply(BigDecimal.valueOf(0.95)).setScale(0, RoundingMode.HALF_UP);
+        BigDecimal price = state.openPrice().multiply(BigDecimal.valueOf(0.95)).setScale(2, RoundingMode.HALF_UP);
         long now = System.currentTimeMillis();
 
         for (int i = days; i >= 0; i--) {
             BigDecimal open = price;
             BigDecimal close = open.multiply(BigDecimal.ONE.add(BigDecimal.valueOf(random.nextDouble(-0.02, 0.02))))
-                    .setScale(0, RoundingMode.HALF_UP);
+                    .setScale(2, RoundingMode.HALF_UP);
             BigDecimal high = open.max(close)
                     .multiply(BigDecimal.ONE.add(BigDecimal.valueOf(random.nextDouble(0, 0.01))))
-                    .setScale(0, RoundingMode.HALF_UP);
+                    .setScale(2, RoundingMode.HALF_UP);
             BigDecimal low = open.min(close)
                     .multiply(BigDecimal.ONE.subtract(BigDecimal.valueOf(random.nextDouble(0, 0.01))))
-                    .setScale(0, RoundingMode.HALF_UP);
+                    .setScale(2, RoundingMode.HALF_UP);
             long volume = random.nextLong(1000, 50000);
 
             Map<String, Object> candle = new LinkedHashMap<>();
