@@ -1,5 +1,6 @@
 package com.bloomfield.terminal.model;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public record OrderBookEntry(
@@ -7,5 +8,5 @@ public record OrderBookEntry(
         List<Level> bids,
         List<Level> asks
 ) {
-    public record Level(double price, int quantity) {}
+    public record Level(BigDecimal price, int quantity) {}
 }

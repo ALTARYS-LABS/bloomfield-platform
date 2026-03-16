@@ -1,11 +1,12 @@
 package com.bloomfield.terminal.model;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public record MarketIndex(
         String name,
-        double value,
-        double change,
-        double changePercent,
-        List<Double> sparklineData
+        BigDecimal value,
+        BigDecimal change,
+        BigDecimal changePercent,
+        List<BigDecimal> sparklineData
 ) {}
