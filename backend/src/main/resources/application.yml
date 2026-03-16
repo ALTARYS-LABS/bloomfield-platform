@@ -5,6 +5,11 @@ spring:
   application:
     name: bloomfield-terminal
 
+market:
+  indices:
+    composite-base: 234.56
+    brvm10-base: 178.23
+
 logging:
   level:
     root: INFO

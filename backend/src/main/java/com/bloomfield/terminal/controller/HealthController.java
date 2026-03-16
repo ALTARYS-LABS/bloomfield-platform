@@ -1,15 +1,15 @@
 package com.bloomfield.terminal.controller;
 
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @RestController
-public class HealthController {
+record HealthController() {
 
     @GetMapping("/api/health")
-    public Map<String, String> health() {
+    Map<String, String> health() {
         return Map.of("status", "OK", "service", "Bloomfield Terminal API");
     }
 }
