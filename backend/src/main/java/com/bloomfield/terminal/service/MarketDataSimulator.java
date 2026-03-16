@@ -1,5 +1,6 @@
 package com.bloomfield.terminal.service;
 
+import com.bloomfield.terminal.config.MarketIndicesProperties;
 import com.bloomfield.terminal.model.MarketIndex;
 import com.bloomfield.terminal.model.OrderBookEntry;
 import com.bloomfield.terminal.model.Quote;
@@ -16,16 +17,16 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class MarketDataSimulator {
 
-    private static final BigDecimal COMPOSITE_BASE = BigDecimal.valueOf(234.56);
-    private static final BigDecimal BRVM10_BASE = BigDecimal.valueOf(178.23);
     private static final BigDecimal ONE_HUNDRED = BigDecimal.valueOf(100);
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final BigDecimal compositeBase;
+    private final BigDecimal brvm10Base;
     private final Map<String, TickerState> tickers = new ConcurrentHashMap<>();
     private final List<BigDecimal> compositeHistory = new ArrayList<>();
     private final List<BigDecimal> brvm10History = new ArrayList<>();
-    private BigDecimal compositeValue = BigDecimal.valueOf(234.56);
-    private BigDecimal brvm10Value = BigDecimal.valueOf(178.23);
+    private BigDecimal compositeValue;
+    private BigDecimal brvm10Value;
 
     public record TickerState(
             String name, String sector, BigDecimal openPrice,
@@ -33,8 +34,13 @@ public class MarketDataSimulator {
             BigDecimal marketCap, BigDecimal per, BigDecimal dividendYield
     ) {}
 
-    public MarketDataSimulator(SimpMessagingTemplate messagingTemplate) {
+    public MarketDataSimulator(SimpMessagingTemplate messagingTemplate,
+                               MarketIndicesProperties indicesProperties) {
         this.messagingTemplate = messagingTemplate;
+        this.compositeBase = indicesProperties.compositeBase();
+        this.brvm10Base = indicesProperties.brvm10Base();
+        this.compositeValue = compositeBase;
+        this.brvm10Value = brvm10Base;
         initTickers();
     }
 
@@ -59,7 +65,7 @@ public class MarketDataSimulator {
     }
 
     @Scheduled(fixedDelayString = "#{T(java.util.concurrent.ThreadLocalRandom).current().nextLong(1000, 2001)}")
-    public void publishQuotes() {
+    void publishQuotes() {
         var random = ThreadLocalRandom.current();
         List<Quote> quotes = new ArrayList<>();
 
@@ -94,7 +100,7 @@ public class MarketDataSimulator {
     }
 
     @Scheduled(fixedDelay = 2000)
-    public void publishOrderBook() {
+    void publishOrderBook() {
         var random = ThreadLocalRandom.current();
         List<OrderBookEntry> books = new ArrayList<>();
 
@@ -118,7 +124,7 @@ public class MarketDataSimulator {
     }
 
     @Scheduled(fixedDelay = 3000)
-    public void publishIndices() {
+    void publishIndices() {
         var random = ThreadLocalRandom.current();
 
         BigDecimal compositeVariation = BigDecimal.ONE.add(BigDecimal.valueOf(random.nextDouble(-0.001, 0.001)));
@@ -131,13 +137,13 @@ public class MarketDataSimulator {
         brvm10History.add(brvm10Value);
         if (brvm10History.size() > 20) brvm10History.removeFirst();
 
-        BigDecimal compositeChange = compositeValue.subtract(COMPOSITE_BASE).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal brvm10Change = brvm10Value.subtract(BRVM10_BASE).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal compositeChange = compositeValue.subtract(compositeBase).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal brvm10Change = brvm10Value.subtract(brvm10Base).setScale(2, RoundingMode.HALF_UP);
 
         BigDecimal compositePct = compositeChange.multiply(ONE_HUNDRED)
-                .divide(COMPOSITE_BASE, 2, RoundingMode.HALF_UP);
+                .divide(compositeBase, 2, RoundingMode.HALF_UP);
         BigDecimal brvm10Pct = brvm10Change.multiply(ONE_HUNDRED)
-                .divide(BRVM10_BASE, 2, RoundingMode.HALF_UP);
+                .divide(brvm10Base, 2, RoundingMode.HALF_UP);
 
         List<MarketIndex> indices = List.of(
                 new MarketIndex("BRVM Composite", compositeValue, compositeChange,
