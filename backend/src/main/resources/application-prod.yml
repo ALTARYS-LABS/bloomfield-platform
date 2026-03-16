@@ -1,0 +1,9 @@
+app:
+  cors:
+    allowed-origins:
+      - "https://bloomfield-intelligence.altaryslabs.com"
+
+logging:
+  level:
+    root: WARN
+    com.bloomfield: INFO
