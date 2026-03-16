@@ -1,9 +1,7 @@
 package com.bloomfield.terminal.service;
 
 import com.bloomfield.terminal.config.MarketIndicesProperties;
-import com.bloomfield.terminal.model.MarketIndex;
-import com.bloomfield.terminal.model.OrderBookEntry;
-import com.bloomfield.terminal.model.Quote;
+import com.bloomfield.terminal.model.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -26,18 +24,6 @@ public class MarketDataSimulator {
   private final List<BigDecimal> brvm10History = new ArrayList<>();
   private BigDecimal compositeValue;
   private BigDecimal brvm10Value;
-
-  public record TickerState(
-      String name,
-      String sector,
-      BigDecimal openPrice,
-      BigDecimal price,
-      BigDecimal high,
-      BigDecimal low,
-      long volume,
-      BigDecimal marketCap,
-      BigDecimal per,
-      BigDecimal dividendYield) {}
 
   public MarketDataSimulator(
       SimpMessagingTemplate messagingTemplate, MarketIndicesProperties indicesProperties) {
@@ -180,6 +166,11 @@ public class MarketDataSimulator {
     brvm10History.add(brvm10Value);
     if (brvm10History.size() > 20) brvm10History.removeFirst();
 
+    List<MarketIndex> indices = getMarketIndices();
+    messagingTemplate.convertAndSend("/topic/brvm/indices", indices);
+  }
+
+  private List<MarketIndex> getMarketIndices() {
     BigDecimal compositeChange =
         compositeValue.subtract(compositeBase).setScale(2, RoundingMode.HALF_UP);
     BigDecimal brvm10Change = brvm10Value.subtract(brvm10Base).setScale(2, RoundingMode.HALF_UP);
@@ -189,17 +180,15 @@ public class MarketDataSimulator {
     BigDecimal brvm10Pct =
         brvm10Change.multiply(ONE_HUNDRED).divide(brvm10Base, 2, RoundingMode.HALF_UP);
 
-    List<MarketIndex> indices =
-        List.of(
-            new MarketIndex(
-                "BRVM Composite",
-                compositeValue,
-                compositeChange,
-                compositePct,
-                new ArrayList<>(compositeHistory)),
-            new MarketIndex(
-                "BRVM 10", brvm10Value, brvm10Change, brvm10Pct, new ArrayList<>(brvm10History)));
-    messagingTemplate.convertAndSend("/topic/brvm/indices", indices);
+    return List.of(
+        new MarketIndex(
+            "BRVM Composite",
+            compositeValue,
+            compositeChange,
+            compositePct,
+            new ArrayList<>(compositeHistory)),
+        new MarketIndex(
+            "BRVM 10", brvm10Value, brvm10Change, brvm10Pct, new ArrayList<>(brvm10History)));
   }
 
   public List<Map<String, Object>> generateHistory(String ticker, int days) {
@@ -243,9 +232,5 @@ public class MarketDataSimulator {
 
   public TickerState getTickerState(String ticker) {
     return tickers.get(ticker);
-  }
-
-  public Map<String, TickerState> getAllTickers() {
-    return Collections.unmodifiableMap(tickers);
   }
 }
