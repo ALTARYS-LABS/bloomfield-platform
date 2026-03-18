@@ -116,7 +116,7 @@ export default function Terminal() {
           <div className={`${widgetClass}`}>
             <EmitterDetail ticker={selectedTicker} quote={quotes.get(selectedTicker)} />
           </div>
-          <div className={`${widgetClass} h-[300px]`}>
+          <div className={`${widgetClass} h-[420px]`}>
             <CandlestickChart ticker={selectedTicker} history={history} latestQuote={quotes.get(selectedTicker)} />
           </div>
           <div className={`${widgetClass} min-h-[200px]`}>
