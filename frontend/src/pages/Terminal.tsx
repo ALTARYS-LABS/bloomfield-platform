@@ -11,6 +11,8 @@ import IndicesWidget from '../components/IndicesWidget';
 import EmitterDetail from '../components/EmitterDetail';
 import type { CandleData } from '../types/market';
 
+type MobileTab = 'marche' | 'analyse';
+
 const layouts = {
   lg: [
     { i: 'table', x: 0, y: 0, w: 7, h: 4 },
@@ -44,6 +46,7 @@ export default function Terminal() {
   const [history, setHistory] = useState<CandleData[]>([]);
   const [clock, setClock] = useState('');
   const isMobile = useIsMobile();
+  const [activeTab, setActiveTab] = useState<MobileTab>('marche');
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -105,23 +108,52 @@ export default function Terminal() {
 
       {/* Widgets */}
       {isMobile ? (
-        <div className="flex-1 p-2 flex flex-col gap-2 overflow-auto">
-          {/* Mobile: stacked layout */}
-          <div className={`${widgetClass} min-h-[160px]`}>
-            <IndicesWidget indices={indices} />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Tab content */}
+          <div className="flex-1 overflow-auto p-2 flex flex-col gap-2">
+            {activeTab === 'marche' ? (
+              <>
+                <div className={`${widgetClass} h-[280px]`}>
+                  <IndicesWidget indices={indices} />
+                </div>
+                <div className={`${widgetClass} h-[380px]`}>
+                  <MarketTable quotes={quotes} selectedTicker={selectedTicker} onSelectTicker={handleSelectTicker} />
+                </div>
+                <div className={`${widgetClass} h-[280px]`}>
+                  <EmitterDetail ticker={selectedTicker} quote={quotes.get(selectedTicker)} />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={`${widgetClass} h-[420px]`}>
+                  <CandlestickChart ticker={selectedTicker} history={history} latestQuote={quotes.get(selectedTicker)} />
+                </div>
+                <div className={`${widgetClass} h-[320px]`}>
+                  <OrderBook orderBook={orderBooks.get(selectedTicker)} ticker={selectedTicker} />
+                </div>
+              </>
+            )}
           </div>
-          <div className={`${widgetClass} h-[350px]`}>
-            <MarketTable quotes={quotes} selectedTicker={selectedTicker} onSelectTicker={handleSelectTicker} />
-          </div>
-          <div className={`${widgetClass}`}>
-            <EmitterDetail ticker={selectedTicker} quote={quotes.get(selectedTicker)} />
-          </div>
-          <div className={`${widgetClass} h-[420px]`}>
-            <CandlestickChart ticker={selectedTicker} history={history} latestQuote={quotes.get(selectedTicker)} />
-          </div>
-          <div className={`${widgetClass} min-h-[200px]`}>
-            <OrderBook orderBook={orderBooks.get(selectedTicker)} ticker={selectedTicker} />
-          </div>
+
+          {/* Bottom tab bar */}
+          <nav className="shrink-0 flex border-t border-border bg-bg-header">
+            <button
+              onClick={() => setActiveTab('marche')}
+              className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors
+                ${activeTab === 'marche' ? 'text-accent border-t-2 border-accent -mt-px' : 'text-text-secondary'}`}
+            >
+              <span className="text-base leading-none">📊</span>
+              <span>Marché</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('analyse')}
+              className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors
+                ${activeTab === 'analyse' ? 'text-accent border-t-2 border-accent -mt-px' : 'text-text-secondary'}`}
+            >
+              <span className="text-base leading-none">📈</span>
+              <span>Analyse</span>
+            </button>
+          </nav>
         </div>
       ) : (
         <div ref={gridContainerRef} className="flex-1 p-2 overflow-auto">
