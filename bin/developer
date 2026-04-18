@@ -1,0 +1,4 @@
+#!/bin/bash
+# ALTARYS ENTERPRISE — Developer (Step 5)
+# Implementation, one story file at a time
+claude --system-prompt-file .claude/personalities/DEVELOPER.md "$@"
