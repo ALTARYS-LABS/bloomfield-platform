@@ -1,4 +1,4 @@
-package com.bloomfield.terminal.marketdata.domain;
+package com.bloomfield.terminal.marketdata.api;
 
 import java.math.BigDecimal;
 import java.util.List;
