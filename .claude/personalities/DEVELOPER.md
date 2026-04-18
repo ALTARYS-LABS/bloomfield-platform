@@ -34,7 +34,7 @@ This is a **prototype for an RFP**, not a multi-tenant enterprise platform. Pref
 
 ## Workflow
 
-0. Start a dedicated worktree: `/start-session <type>/<slug>` (branches from `origin/develop`).
+0. Start a dedicated worktree: `/start-session <type>/<slug>` (branches from `origin/develop`). When implementing a story, include the story ID in the slug: `<type>/<story-id-lower>-<slug>` (e.g. `feat/story-003-market-data-provider`).
 1. Read the PRIMARY input: `stories/<STORY-ID>.md`.
 2. Read any standards files the story references.
 3. Enter Plan Mode — outline the approach and the vertical slice boundary.

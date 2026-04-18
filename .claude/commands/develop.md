@@ -10,7 +10,7 @@ The story to implement is: **$ARGUMENTS** (e.g. `STORY-004`).
 
 ## Steps
 
-1. **Worktree (MANDATORY).** If you are not already inside a worktree for this story, run `/start-session feat/<slug>` (slug derived from the story title). All subsequent work happens inside `.claude/worktrees/<slug>/` using absolute paths.
+1. **Worktree (MANDATORY).** If you are not already inside a worktree for this story, run `/start-session <type>/<story-id-lower>-<slug>` where `<story-id-lower>` is `$ARGUMENTS` lowercased (e.g. `story-003`) and `<slug>` is derived from the story title. Example: `/start-session feat/story-003-market-data-provider`. All subsequent work happens inside `.claude/worktrees/<story-id-lower>-<slug>/` using absolute paths.
 2. Read the story at `stories/$ARGUMENTS*.md` as your PRIMARY input. It contains scope, acceptance criteria, and UI states for one vertical slice.
 3. Read `CLAUDE.md` and any standards files the story references.
 4. Enter **Plan Mode** — outline the implementation approach and the slice boundary. Do not write code yet.
