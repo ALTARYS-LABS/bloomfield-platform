@@ -1,4 +1,4 @@
-package com.bloomfield.terminal.config;
+package com.bloomfield.terminal.shared;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

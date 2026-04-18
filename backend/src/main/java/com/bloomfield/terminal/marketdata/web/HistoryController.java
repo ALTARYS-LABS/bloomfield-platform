@@ -1,6 +1,6 @@
-package com.bloomfield.terminal.controller;
+package com.bloomfield.terminal.marketdata.web;
 
-import com.bloomfield.terminal.service.MarketDataSimulator;
+import com.bloomfield.terminal.marketdata.internal.MarketDataSimulator;
 import java.util.List;
 import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;

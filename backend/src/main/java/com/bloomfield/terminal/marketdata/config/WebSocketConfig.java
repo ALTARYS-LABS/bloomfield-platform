@@ -1,5 +1,6 @@
-package com.bloomfield.terminal.config;
+package com.bloomfield.terminal.marketdata.config;
 
+import com.bloomfield.terminal.shared.CorsProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;

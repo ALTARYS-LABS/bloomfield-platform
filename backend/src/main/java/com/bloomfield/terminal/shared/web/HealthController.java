@@ -1,4 +1,4 @@
-package com.bloomfield.terminal.controller;
+package com.bloomfield.terminal.shared.web;
 
 import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
