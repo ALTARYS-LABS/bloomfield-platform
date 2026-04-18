@@ -1,11 +1,11 @@
 # Story Index: Bloomfield Terminal
 
 **Module**: bloomfield-terminal
-**Total stories**: 9
+**Total stories**: 10
 **Decomposed from**: `proto_v2_en.md` (Bloomfield Terminal v2 advanced model)
 **Product context**: Bloomfield Intelligence RFP AO_BI_2026_001 — BRVM real-time terminal (groupement IBEMS + ALTARYS LABS)
 **Date**: 18/04/2026
-**Last updated**: 18/04/2026 (initial decomposition of v2 plan into STORY-002 → STORY-009)
+**Last updated**: 18/04/2026 (added STORY-010 — Sikafinance historical adapter for real BRVM data)
 
 ---
 
@@ -19,10 +19,11 @@ STORY-002 (Persistence Layer & Modulith Skeleton)
     │       ├── STORY-006 (Portfolio Module) ← also depends on STORY-004
     │       ├── STORY-007 (Alerts Module) ← also depends on STORY-004
     │       └── STORY-008 (TimescaleDB Hypertable + OHLCV API)
+    │               └── STORY-010 (Sikafinance Historical Adapter) ← also depends on STORY-003
     └── STORY-004 (User Module — Backend Auth / JWT)
             └── STORY-005 (User Module — Frontend Login & Protected Routes)
 
-STORY-009 (Demo Hardening & v2 Release) ← depends on STORY-002 through STORY-008
+STORY-009 (Demo Hardening & v2 Release) ← depends on STORY-002 through STORY-008, optionally STORY-010
 ```
 
 ---
@@ -40,6 +41,7 @@ STORY-009 (Demo Hardening & v2 Release) ← depends on STORY-002 through STORY-0
 | 7 | STORY-007 | Alerts Module (Price Thresholds, WS Notifications, Offline Delivery) | STORY-003, STORY-004 | M | 🔲 Not started |
 | 8 | STORY-008 | TimescaleDB Hypertable & OHLCV History API | STORY-003 | M | 🔲 Not started |
 | 9 | STORY-009 | Demo Hardening & v2 Release | STORY-002–STORY-008 | S | 🔲 Not started |
+| 10 | STORY-010 | Sikafinance Historical Adapter (real BRVM data) | STORY-003, STORY-008 | M | 🔲 Not started |
 
 Complexity legend: **S** = ≤200 lines / ≤1 day · **M** = 200–400 lines / 1–2 days · **L** = 400–600 lines / 2–3 days (split if friction).
 
@@ -64,10 +66,11 @@ Recommended sequence, respecting the golden rule of short-lived branches (merge 
 5. **STORY-006** — Portfolio module — *First demo-visible v2 feature after login.*
 6. **STORY-007** — Alerts module — *Second demo-visible feature. Introduces Modulith events across modules.*
 7. **STORY-008** — TimescaleDB hypertable + chart API — *Replaces the simulator-regenerated history.*
+8. **STORY-010** — Sikafinance historical adapter — *Plugs real BRVM history behind the `MarketDataProvider` interface, cached into the hypertable. Optional but high-impact for the jury demo.*
 
 ### Phase 4 — Release (Days 15–21)
 
-8. **STORY-009** — Demo hardening, seed data, release PR `develop → main`, tag `v2.0.0`.
+9. **STORY-009** — Demo hardening, seed data, release PR `develop → main`, tag `v2.0.0`.
 
 ### Not part of the v2 release
 
@@ -84,6 +87,7 @@ Within dependency constraints, these pairs can be developed in parallel:
 - **STORY-005** ‖ **STORY-008** — once STORY-004 is merged for auth + STORY-003 is merged for the interface, frontend login and the hypertable chart API can progress in parallel.
 - **STORY-006** ‖ **STORY-007** — both depend on STORY-003 + STORY-004. Disjoint modules (`portfolio/` vs `alerts/`). Do together if two devs available.
 - **STORY-008** ‖ **STORY-006/007** — TimescaleDB work only touches `marketdata/` internals and a new `CandleController`. Safe to land in any order relative to Portfolio/Alerts.
+- **STORY-010** ‖ **STORY-006/007** — Sikafinance adapter lives in `marketdata/internal/` and uses the hypertable from STORY-008 as a cache. Independent of Portfolio/Alerts work.
 
 ---
 
@@ -133,6 +137,7 @@ Per `standards/git-workflow.md`: ideal < 200 lines, acceptable 200–400, split 
 | STORY-007 | ~400 | **Split expected** backend/frontend if friction |
 | STORY-008 | ~300 | Migration + aggregator + controller |
 | STORY-009 | ~200 | Seed data + README/docs + release PR |
+| STORY-010 | ~350 | WireMock-backed tests keep CI hermetic; live call opt-in via env var |
 
 ---
 
