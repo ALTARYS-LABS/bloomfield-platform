@@ -1,7 +1,7 @@
-package com.bloomfield.terminal.service;
+package com.bloomfield.terminal.marketdata.internal;
 
-import com.bloomfield.terminal.config.MarketIndicesProperties;
-import com.bloomfield.terminal.model.*;
+import com.bloomfield.terminal.marketdata.config.MarketIndicesProperties;
+import com.bloomfield.terminal.marketdata.domain.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;

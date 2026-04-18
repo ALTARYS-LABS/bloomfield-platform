@@ -1,4 +1,4 @@
-package com.bloomfield.terminal.config;
+package com.bloomfield.terminal.marketdata.config;
 
 import java.math.BigDecimal;
 import org.springframework.boot.context.properties.ConfigurationProperties;

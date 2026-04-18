@@ -9,7 +9,7 @@
 - Infrastructure: Docker + Coolify
 
 ## Critical Rules (NEVER violate)
-1. Every database query MUST include tenant isolation context
+1. Data access goes through Spring Data JDBC repositories — never raw `JdbcTemplate` outside `internal/` packages. No JPA.
 2. Financial calculations: BigDecimal ONLY — never double/float
 3. Use `@ConfigurationProperties` records for externalized configuration — never hardcode values that belong in `application.yml`
 4. Only use `public` when the field, method, class, or record is accessed from outside its package. Default to package-private.

@@ -1,4 +1,4 @@
-package com.bloomfield.terminal.config;
+package com.bloomfield.terminal.shared;
 
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
