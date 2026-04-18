@@ -1,0 +1,23 @@
+name: Enforce Gitflow
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-source-branch:
+    name: Source branch must be develop
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reject PRs to main that don't come from develop
+        if: github.head_ref != 'develop'
+        run: |
+          echo "❌ PRs to main must come from the develop branch."
+          echo "   Source branch: ${{ github.head_ref }}"
+          echo ""
+          echo "   Workflow:"
+          echo "   feature/* → develop (via PR) → main (release PR only)"
+          exit 1
+
+      - name: OK
+        run: echo "✅ Source branch is develop — release PR allowed."
