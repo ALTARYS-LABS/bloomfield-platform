@@ -22,8 +22,11 @@ services:
   backend:
     build: ./backend
     restart: unless-stopped
-    ports:
-      - "${BACKEND_PORT:-8080}:8080"
+    # Pas de `ports:` publiés sur l'hote: Traefik (Coolify) route en interne
+    # sur le reseau Docker. Publier 8080 sur l'hote cree une collision en
+    # staging/prod avec les autres services du serveur Coolify.
+    # Pour atteindre le backend depuis la machine du developpeur, passer
+    # par le frontend (proxy nginx) ou lancer `./gradlew bootRun` en natif.
     depends_on:
       postgres:
         condition: service_healthy
