@@ -47,7 +47,10 @@ function useIsMobile() {
 
 export default function Terminal() {
   const { connected, quotes, orderBooks, indices, fetchHistory } = useMarketData();
-  const [selectedTicker, setSelectedTicker] = useState('SGBCI');
+  // Default aligne sur le seed `data/brvm-tickers.yml` (code BRVM officiel SGBC,
+  // pas SGBCI), sinon les widgets graphique / carnet / detail emetteur restent
+  // vides au montage car le ticker n'existe pas cote backend.
+  const [selectedTicker, setSelectedTicker] = useState('SGBC');
   const [history, setHistory] = useState<CandleData[]>([]);
   const [clock, setClock] = useState('');
   const isMobile = useIsMobile();
