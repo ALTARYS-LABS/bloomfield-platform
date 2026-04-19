@@ -258,7 +258,11 @@ Modulith exposes a bean `IncompleteEventPublications` (or `EventPublicationRepos
 
 ### b) Completion mode `@ApplicationModuleListener(completion = ...)`
 
-The default is `REGISTER_ON_COMPLETION` (rows are kept as audit trail). Other options delete the row after completion, which keeps the table small but loses the audit history. For noisy domains you almost certainly want to delete completed rows and scale with data, not audit logs. The global switch is `spring.modulith.events.completion-mode=DELETE`.
+The default is `UPDATE` - rows are kept with `completion_date` set as an audit trail. Other values of `spring.modulith.events.completion-mode` are `DELETE` (drop the row on success) and `ARCHIVE` (move it to a separate archive table). For noisy domains you almost certainly want `DELETE` and to scale with live data, not audit logs.
+
+**In Bloomfield we set `DELETE`** (see `application.yml`). Rationale: the `QuoteTick` cadence is roughly one publication per ticker per second. Keeping every completed row would grow `event_publication` by hundreds of MB per day for nothing. With `DELETE`, the table only ever contains rows whose listener has not finished yet - which doubles as a live "failure queue" you can query with `SELECT event_type, listener_id, publication_date FROM event_publication;`. If the table is empty, all listeners are caught up; if it's growing, something is throwing.
+
+The tradeoff we accept: no audit trail of past events in the DB. For order placements, payments or anything with a regulatory requirement, override locally on the listener with `@ApplicationModuleListener(completion = REGISTER_ON_COMPLETION)` - that wins over the global setting per-listener.
 
 ### c) Externalising events to a real broker
 
