@@ -15,6 +15,14 @@ spring:
   sql:
     init:
       mode: never
+  modulith:
+    events:
+      # Cadence QuoteTick = 1/s × tous les tickers, donc `event_publication`
+      # grossit vite si on garde les lignes terminees (mode `update` par defaut).
+      # `delete` supprime la ligne au commit du listener (`AlertEngine.onQuoteTick`)
+      # et ne laisse dans la table que les evenements non-completes (listener qui
+      # a jete), ce qui en fait une "queue des echecs" directement diagnostiquable.
+      completion-mode: delete
 
 market:
   indices:
