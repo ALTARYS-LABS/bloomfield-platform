@@ -23,7 +23,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableMethodSecurity
-@EnableConfigurationProperties(JwtProperties.class)
+@EnableConfigurationProperties({JwtProperties.class, CookieProperties.class})
 class SecurityConfig {
 
   private final JwtProperties jwtProperties;
@@ -69,7 +69,12 @@ class SecurityConfig {
         .authorizeHttpRequests(
             auth ->
                 auth.requestMatchers(
-                        "/api/health", "/auth/register", "/auth/login", "/auth/refresh", "/ws/**")
+                        "/api/health",
+                        "/auth/register",
+                        "/auth/login",
+                        "/auth/refresh",
+                        "/auth/logout",
+                        "/ws/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

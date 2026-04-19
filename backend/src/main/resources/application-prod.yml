@@ -2,6 +2,9 @@ app:
   cors:
     allowed-origins:
       - "https://bloomfield-intelligence.altaryslabs.com"
+  auth:
+    refresh-cookie:
+      secure: true
 
 logging:
   level:
