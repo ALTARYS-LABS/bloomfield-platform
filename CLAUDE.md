@@ -19,6 +19,7 @@
 8. The app MUST start locally: docker-compose.yml must exist with all external dependencies (PostgreSQL, Keycloak, etc.). Verify with `docker compose up -d && ./gradlew bootRun`.
 9. **Git workflow**: @standards/git-workflow.md - governs worktree isolation, branch naming, Gitflow model, and PR rules. Loaded automatically by Claude Code.
 10. **Never use em dash (U+2014) in any file** - not in code strings, comments, JSX, documentation, or CLAUDE.md itself. Always use a plain hyphen `-` instead.
+11. **All source code comments must be written in French** - applies to every new or modified comment in backend (`.java`), frontend (`.ts`, `.tsx`, `.js`, `.jsx`, `.css`), config (`.yml`, `.yaml`, `.properties`, `.sql`, Dockerfile, shell), and Javadoc/JSDoc blocks. Identifiers (class, method, variable, package names), commit messages, PR descriptions, documentation under `stories/`, `standards/`, `_kb_/`, and this `CLAUDE.md` remain in English. When editing an existing English comment, translate it to French as part of the change; do not retro-translate untouched comments.
 
 
 ## Common Mistakes to Avoid
