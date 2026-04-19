@@ -5,10 +5,12 @@ import com.bloomfield.terminal.marketdata.api.MarketIndex;
 import com.bloomfield.terminal.marketdata.api.OhlcvCandle;
 import com.bloomfield.terminal.marketdata.api.OrderBookEntry;
 import com.bloomfield.terminal.marketdata.api.Quote;
+import com.bloomfield.terminal.marketdata.api.QuoteTick;
 import com.bloomfield.terminal.marketdata.api.TickerState;
 import com.bloomfield.terminal.marketdata.config.MarketIndicesProperties;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,14 +18,15 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
- * In-memory simulator implementing {@link MarketDataProvider}. Seeded from {@code
- * data/brvm-tickers.yml} via {@link TickerSeedLoader}; state mutates on a scheduled tick and is
- * broadcast over STOMP. A real feed adapter replaces this bean without touching controllers.
+ * Simulateur en mémoire implémentant {@link MarketDataProvider}. Alimenté par {@code
+ * data/brvm-tickers.yml} via {@link TickerSeedLoader}; l'état mute sur un tick programmé et est
+ * diffusé via STOMP. Un vrai adaptateur de flux remplace ce bean sans toucher aux contrôleurs.
  */
 @Service
 class SimulatedMarketDataProvider implements MarketDataProvider {
@@ -31,6 +34,7 @@ class SimulatedMarketDataProvider implements MarketDataProvider {
   private static final BigDecimal ONE_HUNDRED = BigDecimal.valueOf(100);
 
   private final SimpMessagingTemplate messagingTemplate;
+  private final ApplicationEventPublisher eventPublisher;
   private final BigDecimal compositeBase;
   private final BigDecimal brvm10Base;
   private final Map<String, TickerState> tickers = new ConcurrentHashMap<>();
@@ -41,9 +45,11 @@ class SimulatedMarketDataProvider implements MarketDataProvider {
 
   SimulatedMarketDataProvider(
       SimpMessagingTemplate messagingTemplate,
+      ApplicationEventPublisher eventPublisher,
       MarketIndicesProperties indicesProperties,
       TickerSeedLoader seedLoader) {
     this.messagingTemplate = messagingTemplate;
+    this.eventPublisher = eventPublisher;
     this.compositeBase = indicesProperties.compositeBase();
     this.brvm10Base = indicesProperties.brvm10Base();
     this.compositeValue = compositeBase;
@@ -129,6 +135,7 @@ class SimulatedMarketDataProvider implements MarketDataProvider {
   void publishQuotes() {
     var random = ThreadLocalRandom.current();
     long now = System.currentTimeMillis();
+    var nowInstant = Instant.now();
     List<Quote> quotes = new ArrayList<>();
 
     for (var entry : tickers.entrySet()) {
@@ -158,6 +165,9 @@ class SimulatedMarketDataProvider implements MarketDataProvider {
       tickers.put(ticker, updated);
 
       quotes.add(toQuote(ticker, updated, now));
+
+      /* Publie un événement de tick de prix pour les abonnés (ex. module d'alertes) */
+      eventPublisher.publishEvent(new QuoteTick(ticker, newPrice, nowInstant));
     }
     messagingTemplate.convertAndSend("/topic/brvm/quotes", quotes);
   }
