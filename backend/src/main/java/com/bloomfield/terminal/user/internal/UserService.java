@@ -36,7 +36,7 @@ public class UserService {
     if (userRepository.existsByEmail(email)) {
       throw new EmailAlreadyUsedException("Email already registered");
     }
-    UserAccount user =
+    var user =
         UserAccount.newUser(
             UUID.randomUUID(),
             email,
@@ -49,7 +49,7 @@ public class UserService {
   }
 
   public TokenPair login(String email, String password) {
-    UserAccount user =
+    var user =
         userRepository
             .findByEmail(email)
             .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
@@ -63,8 +63,8 @@ public class UserService {
   }
 
   public TokenPair refresh(String rawRefreshToken) {
-    String hash = JwtIssuer.sha256(rawRefreshToken);
-    RefreshTokenRecord record =
+    var hash = JwtIssuer.sha256(rawRefreshToken);
+    var record =
         refreshTokenRepository
             .findByTokenHash(hash)
             .orElseThrow(() -> new InvalidCredentialsException("Invalid refresh token"));
@@ -74,7 +74,7 @@ public class UserService {
     if (record.expiresAt().isBefore(OffsetDateTime.now(ZoneOffset.UTC))) {
       throw new InvalidCredentialsException("Refresh token expired");
     }
-    RefreshTokenRecord revoked =
+    var revoked =
         new RefreshTokenRecord(
             record.id(),
             record.userId(),
@@ -83,7 +83,7 @@ public class UserService {
             OffsetDateTime.now(ZoneOffset.UTC));
     refreshTokenRepository.save(revoked);
 
-    UserAccount user =
+    var user =
         userRepository
             .findById(record.userId())
             .orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -91,7 +91,7 @@ public class UserService {
   }
 
   public void logout(String rawRefreshToken) {
-    String hash = JwtIssuer.sha256(rawRefreshToken);
+    var hash = JwtIssuer.sha256(rawRefreshToken);
     refreshTokenRepository
         .findByTokenHash(hash)
         .ifPresent(

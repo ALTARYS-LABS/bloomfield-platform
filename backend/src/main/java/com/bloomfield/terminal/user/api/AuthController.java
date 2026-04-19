@@ -1,15 +1,15 @@
-package com.bloomfield.terminal.user.web;
+package com.bloomfield.terminal.user.api;
 
+import com.bloomfield.terminal.user.api.dto.LoginRequest;
+import com.bloomfield.terminal.user.api.dto.LogoutRequest;
+import com.bloomfield.terminal.user.api.dto.MeResponse;
+import com.bloomfield.terminal.user.api.dto.RefreshRequest;
+import com.bloomfield.terminal.user.api.dto.RegisterRequest;
+import com.bloomfield.terminal.user.api.dto.TokenResponse;
 import com.bloomfield.terminal.user.domain.UserAccount;
 import com.bloomfield.terminal.user.internal.RoleMapper;
 import com.bloomfield.terminal.user.internal.TokenPair;
 import com.bloomfield.terminal.user.internal.UserService;
-import com.bloomfield.terminal.user.web.dto.LoginRequest;
-import com.bloomfield.terminal.user.web.dto.LogoutRequest;
-import com.bloomfield.terminal.user.web.dto.MeResponse;
-import com.bloomfield.terminal.user.web.dto.RefreshRequest;
-import com.bloomfield.terminal.user.web.dto.RegisterRequest;
-import com.bloomfield.terminal.user.web.dto.TokenResponse;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;

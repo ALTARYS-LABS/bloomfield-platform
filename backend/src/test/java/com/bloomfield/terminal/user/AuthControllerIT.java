@@ -2,11 +2,11 @@ package com.bloomfield.terminal.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.bloomfield.terminal.user.web.dto.LoginRequest;
-import com.bloomfield.terminal.user.web.dto.MeResponse;
-import com.bloomfield.terminal.user.web.dto.RefreshRequest;
-import com.bloomfield.terminal.user.web.dto.RegisterRequest;
-import com.bloomfield.terminal.user.web.dto.TokenResponse;
+import com.bloomfield.terminal.user.api.dto.LoginRequest;
+import com.bloomfield.terminal.user.api.dto.MeResponse;
+import com.bloomfield.terminal.user.api.dto.RefreshRequest;
+import com.bloomfield.terminal.user.api.dto.RegisterRequest;
+import com.bloomfield.terminal.user.api.dto.TokenResponse;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

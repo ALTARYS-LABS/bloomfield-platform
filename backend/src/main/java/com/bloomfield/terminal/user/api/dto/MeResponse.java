@@ -1,4 +1,4 @@
-package com.bloomfield.terminal.user.web.dto;
+package com.bloomfield.terminal.user.api.dto;
 
 import com.bloomfield.terminal.user.api.Role;
 import java.util.Set;

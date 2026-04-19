@@ -1,4 +1,4 @@
-package com.bloomfield.terminal.user.web;
+package com.bloomfield.terminal.user.api;
 
 import com.bloomfield.terminal.user.internal.AccountDisabledException;
 import com.bloomfield.terminal.user.internal.EmailAlreadyUsedException;
