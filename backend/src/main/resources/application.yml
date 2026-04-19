@@ -60,6 +60,14 @@ app:
       secure: false
       max-age: P7D
 
+management:
+  endpoints:
+    web:
+      exposure:
+        # Exposition restreinte : /actuator/health (probe) et /actuator/modulith (carte
+        # des modules pour la démo RFP). Tout le reste reste désactivé par défaut.
+        include: health, modulith
+
 logging:
   level:
     root: INFO
