@@ -1,4 +1,4 @@
-package com.bloomfield.terminal.user.web.dto;
+package com.bloomfield.terminal.user.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

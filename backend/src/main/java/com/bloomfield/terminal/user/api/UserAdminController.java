@@ -1,11 +1,11 @@
-package com.bloomfield.terminal.user.web;
+package com.bloomfield.terminal.user.api;
 
+import com.bloomfield.terminal.user.api.dto.UpdateEnabledRequest;
+import com.bloomfield.terminal.user.api.dto.UpdateRolesRequest;
+import com.bloomfield.terminal.user.api.dto.UserSummary;
 import com.bloomfield.terminal.user.domain.UserAccount;
 import com.bloomfield.terminal.user.internal.RoleMapper;
 import com.bloomfield.terminal.user.internal.UserService;
-import com.bloomfield.terminal.user.web.dto.UpdateEnabledRequest;
-import com.bloomfield.terminal.user.web.dto.UpdateRolesRequest;
-import com.bloomfield.terminal.user.web.dto.UserSummary;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
