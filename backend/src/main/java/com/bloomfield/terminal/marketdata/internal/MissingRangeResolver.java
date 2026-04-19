@@ -68,7 +68,12 @@ final class MissingRangeResolver {
     return List.copyOf(chunks);
   }
 
-  private static boolean isWeekend(LocalDate day) {
+  /**
+   * Package-private : la BRVM ne cote pas le week-end, règle commune à tout le module {@code
+   * marketdata}. Également utilisé par {@link SimulatedHistorySeeder} pour produire des séries
+   * journalières cohérentes avec l'adaptateur Sikafinance.
+   */
+  static boolean isWeekend(LocalDate day) {
     DayOfWeek dow = day.getDayOfWeek();
     return dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY;
   }
