@@ -49,6 +49,7 @@ dependencies {
     testImplementation("org.springframework.modulith:spring-modulith-starter-test")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.wiremock:wiremock-standalone:3.10.0")
 }
 
 tasks.withType<Test> {
