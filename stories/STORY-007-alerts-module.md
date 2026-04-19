@@ -27,14 +27,15 @@ Published by the simulator on every tick via `ApplicationEventPublisher`. This i
 ### Step 2 — New module `alerts`
 ```
 com.bloomfield.terminal.alerts
-├── api/              # AlertRuleRequest, AlertEventView
-├── web/              # AlertController
+├── api/              # AlertController + DTOs (AlertRuleRequest, AlertEventView)
+│   └── dto/
 ├── domain/           # AlertRule, AlertEvent, ThresholdOperator (ABOVE, BELOW, CROSSES_UP, CROSSES_DOWN)
 ├── internal/         # AlertEngine (event listener), repositories, notifier
 └── package-info.java # @ApplicationModule (allowed deps: user api, marketdata api)
 ```
+Package convention matches the `user` and `portfolio` modules (`api/` holds controller + DTOs; `web/` is not used). Per refactor `7d4692a`.
 
-### Step 3 — Flyway migration `V005__alerts_module.sql`
+### Step 3 — Flyway migration `V004__alerts_module.sql`
 ```sql
 CREATE TABLE alert_rules (
   id         UUID PRIMARY KEY,
@@ -68,7 +69,7 @@ CREATE INDEX idx_alert_events_user_undelivered ON alert_events(user_id) WHERE de
 - Debounce: once fired, rule is flagged `enabled = false` (one-shot) — simpler for v2 demo than sliding windows
 
 ### Step 5 — Notification delivery
-- Send via STOMP to `/user/queue/alerts` (authenticated session required)
+- Send via STOMP to `/user/queue/alerts` — authenticated sessions are established by the `ChannelInterceptor` added in STORY-005 Step 0
 - If user not connected: row stays `delivered_at IS NULL`; on WS reconnect, a `ReconnectHandler` (STOMP subscription hook) pushes all undelivered events, then marks them delivered
 
 ### Step 6 — REST endpoints
@@ -114,6 +115,6 @@ CREATE INDEX idx_alert_events_user_undelivered ON alert_events(user_id) WHERE de
 
 - `backend/src/main/java/com/bloomfield/terminal/alerts/**` (new)
 - `backend/src/main/java/com/bloomfield/terminal/marketdata/api/QuoteTick.java` (new event DTO)
-- `backend/src/main/resources/db/migration/V005__alerts_module.sql` (new)
+- `backend/src/main/resources/db/migration/V004__alerts_module.sql` (new)
 - `backend/src/test/java/com/bloomfield/terminal/alerts/**` (new)
 - `frontend/src/components/AlertsWidget.tsx` (new)

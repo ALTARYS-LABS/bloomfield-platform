@@ -3,7 +3,7 @@
 **Type**: feat
 **Status**: todo
 **Branch**: `feat/timescaledb-ohlcv-history`
-**Depends on**: STORY-003
+**Depends on**: STORY-003, STORY-007 (for `marketdata.api.QuoteTick` event consumed by the candle aggregator)
 **Estimated PR size**: ~300 lines
 
 ---
@@ -18,7 +18,7 @@ v2 introduces a TimescaleDB hypertable ingesting OHLCV candles from the live sim
 
 ## What Needs to Be Done
 
-### Step 1 — Flyway migration `V006__ohlcv_hypertable.sql`
+### Step 1 — Flyway migration `V005__ohlcv_hypertable.sql`
 ```sql
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
@@ -106,7 +106,7 @@ Daily view similarly. This keeps the chart API fast at coarse resolutions.
 
 ## Related Files
 
-- `backend/src/main/resources/db/migration/V006__ohlcv_hypertable.sql` (new)
+- `backend/src/main/resources/db/migration/V005__ohlcv_hypertable.sql` (new)
 - `backend/src/main/java/com/bloomfield/terminal/marketdata/internal/CandleAggregator.java` (new)
 - `backend/src/main/java/com/bloomfield/terminal/marketdata/internal/OhlcvRepository.java` (new)
 - `backend/src/main/java/com/bloomfield/terminal/marketdata/web/CandleController.java` (new)
