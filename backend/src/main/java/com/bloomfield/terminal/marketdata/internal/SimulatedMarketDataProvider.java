@@ -2,7 +2,6 @@ package com.bloomfield.terminal.marketdata.internal;
 
 import com.bloomfield.terminal.marketdata.api.MarketDataProvider;
 import com.bloomfield.terminal.marketdata.api.MarketIndex;
-import com.bloomfield.terminal.marketdata.api.OhlcvCandle;
 import com.bloomfield.terminal.marketdata.api.OrderBookEntry;
 import com.bloomfield.terminal.marketdata.api.Quote;
 import com.bloomfield.terminal.marketdata.api.QuoteTick;
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.context.ApplicationEventPublisher;
@@ -84,39 +82,6 @@ class SimulatedMarketDataProvider implements MarketDataProvider {
   @Override
   public Optional<TickerState> tickerState(String ticker) {
     return Optional.ofNullable(tickers.get(ticker));
-  }
-
-  @Override
-  public List<OhlcvCandle> history(String ticker, int days) {
-    TickerState state = tickers.get(ticker);
-    if (state == null) return List.of();
-
-    var random = new Random(ticker.hashCode());
-    List<OhlcvCandle> history = new ArrayList<>();
-    BigDecimal price =
-        state.openPrice().multiply(BigDecimal.valueOf(0.95)).setScale(2, RoundingMode.HALF_UP);
-    long now = System.currentTimeMillis();
-
-    for (int i = days; i >= 0; i--) {
-      BigDecimal open = price;
-      BigDecimal close =
-          open.multiply(BigDecimal.ONE.add(BigDecimal.valueOf(random.nextDouble(-0.02, 0.02))))
-              .setScale(2, RoundingMode.HALF_UP);
-      BigDecimal high =
-          open.max(close)
-              .multiply(BigDecimal.ONE.add(BigDecimal.valueOf(random.nextDouble(0, 0.01))))
-              .setScale(2, RoundingMode.HALF_UP);
-      BigDecimal low =
-          open.min(close)
-              .multiply(BigDecimal.ONE.subtract(BigDecimal.valueOf(random.nextDouble(0, 0.01))))
-              .setScale(2, RoundingMode.HALF_UP);
-      long volume = random.nextLong(1000, 50000);
-      long time = (now - (long) i * 86_400_000L) / 1000L;
-
-      history.add(new OhlcvCandle(time, open, high, low, close, volume));
-      price = close;
-    }
-    return history;
   }
 
   @Override
