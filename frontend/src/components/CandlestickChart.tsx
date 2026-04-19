@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { createChart, CandlestickSeries, HistogramSeries, type IChartApi, type ISeriesApi, type CandlestickData, type HistogramData, type Time } from 'lightweight-charts';
 import type { CandleData, Quote } from '../types/market';
+import { computeWindowLabel } from './chartWindowLabel';
 
 interface Props {
   ticker: string;
@@ -9,6 +10,9 @@ interface Props {
 }
 
 export default function CandlestickChart({ ticker, history, latestQuote }: Props) {
+  // Libellé dérivé exclusivement de la charge utile : en mode simulé sans seeder historique,
+  // toutes les bougies tombent le même jour et l'en-tête affiche « Intraday » au lieu de « 30J ».
+  const windowLabel = useMemo(() => computeWindowLabel(history), [history]);
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -105,7 +109,7 @@ export default function CandlestickChart({ ticker, history, latestQuote }: Props
     <div className="h-full flex flex-col">
       <div className="drag-handle bg-bg-header px-3 py-2 text-xs font-semibold text-text-secondary uppercase tracking-wider border-b border-border rounded-t-lg flex justify-between cursor-grab">
         <span>Graphique — {ticker}</span>
-        <span className="text-text-secondary font-mono">30J</span>
+        <span className="text-text-secondary font-mono">{windowLabel}</span>
       </div>
       <div ref={containerRef} className="flex-1 min-h-0" />
     </div>

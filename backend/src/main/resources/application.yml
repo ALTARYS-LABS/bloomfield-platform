@@ -35,6 +35,13 @@ app:
     # `simulated` = bougies live produites par l'agrégateur en mémoire (défaut hermétique).
     # `sikafinance` = remplissage paresseux de l'hypertable depuis l'endpoint public Sikafinance.
     history-source: ${APP_MARKETDATA_HISTORY_SOURCE:simulated}
+    simulated:
+      # Pré-seed d'historique synthétique (30 jours ouvrés par ticker) au démarrage. Désactivé par
+      # défaut pour garder CI et prod déterministes ; `application-demo.yml` flippe le flag pour
+      # que la démo affiche un graphique crédible immédiatement.
+      seed-history-days: ${APP_MARKETDATA_SIMULATED_SEED_HISTORY_DAYS:false}
+      seed-days: 30
+      daily-volatility: 0.01
     sikafinance:
       base-url: https://www.sikafinance.com
       user-agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0"
