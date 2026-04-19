@@ -9,10 +9,13 @@ import CandlestickChart from '../components/CandlestickChart';
 import OrderBook from '../components/OrderBook';
 import IndicesWidget from '../components/IndicesWidget';
 import EmitterDetail from '../components/EmitterDetail';
+import PortfolioWidget from '../components/PortfolioWidget';
 import type { CandleData } from '../types/market';
 
-type MobileTab = 'marche' | 'analyse';
+type MobileTab = 'marche' | 'analyse' | 'portefeuille';
 
+// Layouts react-grid-layout : le widget "portfolio" occupe la ligne du bas sur toute la largeur
+// afin de laisser la place au formulaire d'ordre et à la liste des positions.
 const layouts = {
   lg: [
     { i: 'table', x: 0, y: 0, w: 7, h: 4 },
@@ -20,6 +23,7 @@ const layouts = {
     { i: 'detail', x: 9, y: 0, w: 3, h: 4 },
     { i: 'chart', x: 0, y: 4, w: 7, h: 5 },
     { i: 'orderbook', x: 7, y: 4, w: 5, h: 5 },
+    { i: 'portfolio', x: 0, y: 9, w: 12, h: 5 },
   ],
   md: [
     { i: 'table', x: 0, y: 0, w: 6, h: 4 },
@@ -27,6 +31,7 @@ const layouts = {
     { i: 'detail', x: 9, y: 0, w: 3, h: 4 },
     { i: 'chart', x: 0, y: 4, w: 6, h: 5 },
     { i: 'orderbook', x: 6, y: 4, w: 6, h: 5 },
+    { i: 'portfolio', x: 0, y: 9, w: 12, h: 5 },
   ],
 };
 
@@ -64,6 +69,11 @@ export default function Terminal() {
   }, [fetchHistory, selectedTicker]);
 
   const widgetClass = "bg-bg-widget rounded-lg border border-border overflow-hidden";
+
+  // Liste des tickers disponibles pour le formulaire d'ordre : dérivée des cotations
+  // déjà reçues, ainsi on n'expose que des valeurs pour lesquelles le backend saura
+  // fournir un prix d'exécution.
+  const availableTickers = Array.from(quotes.keys()).sort();
 
   // Measure container width for react-grid-layout
   const gridContainerRef = useRef<HTMLDivElement>(null);
@@ -111,7 +121,7 @@ export default function Terminal() {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Tab content */}
           <div className="flex-1 overflow-auto p-2 flex flex-col gap-2">
-            {activeTab === 'marche' ? (
+            {activeTab === 'marche' && (
               <>
                 <div className={`${widgetClass} h-[280px]`}>
                   <IndicesWidget indices={indices} />
@@ -123,7 +133,8 @@ export default function Terminal() {
                   <EmitterDetail ticker={selectedTicker} quote={quotes.get(selectedTicker)} />
                 </div>
               </>
-            ) : (
+            )}
+            {activeTab === 'analyse' && (
               <>
                 <div className={`${widgetClass} h-[420px]`}>
                   <CandlestickChart ticker={selectedTicker} history={history} latestQuote={quotes.get(selectedTicker)} />
@@ -132,6 +143,11 @@ export default function Terminal() {
                   <OrderBook orderBook={orderBooks.get(selectedTicker)} ticker={selectedTicker} />
                 </div>
               </>
+            )}
+            {activeTab === 'portefeuille' && (
+              <div className={`${widgetClass} h-[620px]`}>
+                <PortfolioWidget availableTickers={availableTickers} />
+              </div>
             )}
           </div>
 
@@ -152,6 +168,14 @@ export default function Terminal() {
             >
               <span className="text-base leading-none">📈</span>
               <span>Analyse</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('portefeuille')}
+              className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors
+                ${activeTab === 'portefeuille' ? 'text-accent border-t-2 border-accent -mt-px' : 'text-text-secondary'}`}
+            >
+              <span className="text-base leading-none">💼</span>
+              <span>Portef.</span>
             </button>
           </nav>
         </div>
@@ -180,6 +204,9 @@ export default function Terminal() {
             </div>
             <div key="detail" className={widgetClass}>
               <EmitterDetail ticker={selectedTicker} quote={quotes.get(selectedTicker)} />
+            </div>
+            <div key="portfolio" className={widgetClass}>
+              <PortfolioWidget availableTickers={availableTickers} />
             </div>
           </ResponsiveGridLayout>
         </div>
