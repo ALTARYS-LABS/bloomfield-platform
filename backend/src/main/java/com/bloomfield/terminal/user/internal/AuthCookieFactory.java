@@ -14,13 +14,7 @@ import org.springframework.stereotype.Component;
  * _kb_/web-auth-security-tutorial.md}.
  */
 @Component
-public class AuthCookieFactory {
-
-  private final CookieProperties properties;
-
-  AuthCookieFactory(CookieProperties properties) {
-    this.properties = properties;
-  }
+public record AuthCookieFactory(CookieProperties properties) {
 
   public ResponseCookie issue(String refreshToken) {
     return base(refreshToken).maxAge(properties.maxAge()).build();

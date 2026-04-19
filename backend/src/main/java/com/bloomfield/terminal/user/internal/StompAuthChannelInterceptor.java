@@ -2,7 +2,6 @@ package com.bloomfield.terminal.user.internal;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -27,13 +26,7 @@ import org.springframework.stereotype.Component;
  * market-data topics ({@code /topic/*}) continue to work for unauthenticated clients.
  */
 @Component
-class StompAuthChannelInterceptor implements ChannelInterceptor {
-
-  private final JwtDecoder jwtDecoder;
-
-  StompAuthChannelInterceptor(JwtDecoder jwtDecoder) {
-    this.jwtDecoder = jwtDecoder;
-  }
+record StompAuthChannelInterceptor(JwtDecoder jwtDecoder) implements ChannelInterceptor {
 
   @Override
   public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -65,6 +58,6 @@ class StompAuthChannelInterceptor implements ChannelInterceptor {
     }
     return roles.stream()
         .map(r -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + r))
-        .collect(Collectors.toList());
+        .toList();
   }
 }
