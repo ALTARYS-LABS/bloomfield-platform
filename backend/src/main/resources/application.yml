@@ -29,7 +29,19 @@ market:
     composite-base: 234.56
     brvm10-base: 178.23
 
+
 app:
+  marketdata:
+    # `simulated` = bougies live produites par l'agrégateur en mémoire (défaut hermétique).
+    # `sikafinance` = remplissage paresseux de l'hypertable depuis l'endpoint public Sikafinance.
+    history-source: ${APP_MARKETDATA_HISTORY_SOURCE:simulated}
+    sikafinance:
+      base-url: https://www.sikafinance.com
+      user-agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0"
+      request-spacing-ms: 150
+      max-window-days: 89
+      connect-timeout: 5s
+      read-timeout: 15s
   cors:
     allowed-origins:
       - "http://localhost:5173"

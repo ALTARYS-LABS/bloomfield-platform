@@ -2,10 +2,12 @@ package com.bloomfield.terminal.marketdata.web;
 
 import com.bloomfield.terminal.marketdata.api.CandleInterval;
 import com.bloomfield.terminal.marketdata.api.OhlcvCandle;
+import com.bloomfield.terminal.marketdata.internal.HistoricalCandleLoader;
 import com.bloomfield.terminal.marketdata.internal.OhlcvRepository;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/brvm")
-record CandleController(OhlcvRepository repository) {
+record CandleController(
+    OhlcvRepository repository, Optional<HistoricalCandleLoader> historicalLoader) {
 
   /** Nombre maximum de bougies renvoyées quand {@code limit} est omis. */
   private static final int DEFAULT_LIMIT = 200;
@@ -52,11 +55,20 @@ record CandleController(OhlcvRepository repository) {
     Instant effectiveFrom =
         from != null ? from : defaultFrom(effectiveTo, resolved, effectiveLimit);
 
+    // Normalisation unique du ticker à la frontière HTTP : toute la chaîne (loader + repository)
+    // travaille ensuite sur le code canonique en majuscules.
+    String canonicalTicker = ticker.toUpperCase();
+
+    /* Si l'adaptateur Sikafinance est branché (profil démo), on déclenche un remplissage
+     * paresseux de l'hypertable sur la fenêtre demandée avant de lire. En mode simulé, le bean
+     * est absent et on lit directement depuis les bougies produites par l'agrégateur live. */
+    historicalLoader.ifPresent(
+        loader -> loader.ensureCached(canonicalTicker, effectiveFrom, effectiveTo));
+
     /* La requête SQL applique un DESC LIMIT puis un tri ASC final pour renvoyer les plus récentes
      * bougies de la fenêtre dans l'ordre chronologique. */
     List<OhlcvCandle> candles =
-        repository.findRange(
-            ticker.toUpperCase(), resolved, effectiveFrom, effectiveTo, effectiveLimit);
+        repository.findRange(canonicalTicker, resolved, effectiveFrom, effectiveTo, effectiveLimit);
     return ResponseEntity.ok(candles);
   }
 

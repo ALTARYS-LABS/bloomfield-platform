@@ -4,11 +4,15 @@ import com.bloomfield.terminal.marketdata.api.CandleInterval;
 import com.bloomfield.terminal.marketdata.api.OhlcvCandle;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -160,6 +164,68 @@ public class OhlcvRepository {
                 rs.getBigDecimal("low"),
                 rs.getBigDecimal("close"),
                 rs.getLong("volume")));
+  }
+
+  /**
+   * Upsert batché : une seule aller-retour SQL pour toutes les bougies d'un lot (utilisé par {@code
+   * HistoricalCandleLoader} après chaque chunk Sikafinance).
+   */
+  public void upsertBatch(List<HistoricalBar> bars) {
+    if (bars.isEmpty()) {
+      return;
+    }
+    SqlParameterSource[] batch = new SqlParameterSource[bars.size()];
+    for (int i = 0; i < bars.size(); i++) {
+      HistoricalBar bar = bars.get(i);
+      batch[i] =
+          new MapSqlParameterSource()
+              .addValue("ticker", bar.ticker())
+              .addValue("bucket", java.sql.Timestamp.from(bar.bucket()))
+              .addValue("open", bar.open())
+              .addValue("high", bar.high())
+              .addValue("low", bar.low())
+              .addValue("close", bar.close())
+              .addValue("volume", bar.volume());
+    }
+    jdbc.batchUpdate(
+        """
+        INSERT INTO ohlcv (ticker, bucket, open, high, low, close, volume)
+        VALUES (:ticker, :bucket, :open, :high, :low, :close, :volume)
+        ON CONFLICT (ticker, bucket) DO UPDATE SET
+          open = EXCLUDED.open,
+          high = EXCLUDED.high,
+          low = EXCLUDED.low,
+          close = EXCLUDED.close,
+          volume = EXCLUDED.volume
+        """,
+        batch);
+  }
+
+  /**
+   * Retourne l'ensemble des jours calendaires (UTC) pour lesquels au moins une bougie existe dans
+   * la fenêtre demandée. Utilisé par {@code HistoricalCandleLoader} pour ne pas ré-interroger
+   * Sikafinance sur des jours déjà persistés.
+   */
+  public Set<LocalDate> distinctDays(String ticker, Instant from, Instant to) {
+    var params =
+        new MapSqlParameterSource()
+            .addValue("ticker", ticker)
+            .addValue("from", java.sql.Timestamp.from(from))
+            .addValue("to", java.sql.Timestamp.from(to));
+    var rows =
+        jdbc.queryForList(
+            """
+            SELECT DISTINCT (bucket AT TIME ZONE 'UTC')::date AS d
+            FROM ohlcv
+            WHERE ticker = :ticker AND bucket BETWEEN :from AND :to
+            """,
+            params);
+    Set<LocalDate> days = new HashSet<>();
+    for (var row : rows) {
+      // PostgreSQL renvoie java.sql.Date ; on passe par toLocalDate() pour éviter le fuseau JVM.
+      days.add(((java.sql.Date) row.get("d")).toLocalDate());
+    }
+    return days;
   }
 
   /**
