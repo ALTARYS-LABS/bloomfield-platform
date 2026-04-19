@@ -38,13 +38,15 @@ export function useMarketData() {
   }, [subscribe]);
 
   const fetchHistory = useCallback(async (ticker: string): Promise<CandleData[]> => {
-    // `apiJson` attache le header Authorization: Bearer <jwt> et gere le refresh.
-    // Le bare `fetch` precedent partait sans token: sur les environnements ou
-    // `/api/**` exige l'authentification, le backend repondait 401 et le
-    // graphique retombait sur son fallback "une seule bougie" (le dernier quote
-    // STOMP), donnant l'illusion que les 30 jours d'historique n'existaient pas.
+    // STORY-008 : on interroge désormais l'hypertable TimescaleDB via /api/brvm/candles.
+    // L'ancien endpoint /api/brvm/history a été supprimé côté backend (bougies
+    // déterministes régénérées à chaque appel) au profit de bougies réelles issues du
+    // flux simulé. On demande les 30 derniers jours pour conserver le visuel actuel
+    // du graphique.
     try {
-      return await apiJson<CandleData[]>(`/api/brvm/history/${ticker}`);
+      return await apiJson<CandleData[]>(
+        `/api/brvm/candles/${ticker}?interval=1d&limit=30`,
+      );
     } catch {
       return [];
     }

@@ -7,7 +7,6 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.bloomfield.terminal.marketdata.api.OhlcvCandle;
 import com.bloomfield.terminal.marketdata.api.Quote;
 import com.bloomfield.terminal.marketdata.api.SecurityType;
 import com.bloomfield.terminal.marketdata.config.MarketIndicesProperties;
@@ -105,21 +104,6 @@ class SimulatedMarketDataProviderTest {
     assertThat(alpha.changePercent()).isEqualByComparingTo(BigDecimal.ZERO);
     assertThat(beta.change()).isEqualByComparingTo(BigDecimal.ZERO);
     assertThat(beta.changePercent()).isEqualByComparingTo(BigDecimal.ZERO);
-  }
-
-  @Test
-  void historyReturnsCoherentCandles() {
-    var provider =
-        buildProvider(mock(SimpMessagingTemplate.class), mock(ApplicationEventPublisher.class));
-
-    List<OhlcvCandle> candles = provider.history("ALPHA", 30);
-
-    assertThat(candles).hasSize(31);
-    for (OhlcvCandle c : candles) {
-      assertThat(c.high()).isGreaterThanOrEqualTo(c.open().max(c.close()));
-      assertThat(c.low()).isLessThanOrEqualTo(c.open().min(c.close()));
-      assertThat(c.volume()).isGreaterThan(0);
-    }
   }
 
   @Test
