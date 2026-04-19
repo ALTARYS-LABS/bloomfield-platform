@@ -70,6 +70,8 @@ class SecurityConfig {
             auth ->
                 auth.requestMatchers(
                         "/api/health",
+                        "/actuator/health",
+                        "/actuator/modulith/**",
                         "/auth/register",
                         "/auth/login",
                         "/auth/refresh",
