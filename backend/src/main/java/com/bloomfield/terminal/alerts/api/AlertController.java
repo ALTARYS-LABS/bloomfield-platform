@@ -34,7 +34,7 @@ record AlertController(AlertRuleRepository ruleRepository, AlertEventRepository 
   /** Liste toutes les règles d'alerte de l'utilisateur connecté. */
   @GetMapping("/rules")
   List<AlertRuleView> getRules(@AuthenticationPrincipal Jwt principal) {
-    UUID userId = UUID.fromString(principal.getSubject());
+    var userId = UUID.fromString(principal.getSubject());
     return ruleRepository.findByUserId(userId).stream()
         .map(
             rule ->
@@ -52,9 +52,9 @@ record AlertController(AlertRuleRepository ruleRepository, AlertEventRepository 
   @PostMapping("/rules")
   ResponseEntity<AlertRuleView> createRule(
       @AuthenticationPrincipal Jwt principal, @Valid @RequestBody AlertRuleRequest request) {
-    UUID userId = UUID.fromString(principal.getSubject());
+    var userId = UUID.fromString(principal.getSubject());
     var rule =
-        new AlertRule(
+        AlertRule.newRule(
             UUID.randomUUID(),
             userId,
             request.ticker(),
@@ -78,9 +78,9 @@ record AlertController(AlertRuleRepository ruleRepository, AlertEventRepository 
   /** Supprime une règle d'alerte (404 si elle n'appartient pas à l'utilisateur). */
   @DeleteMapping("/rules/{id}")
   ResponseEntity<Void> deleteRule(@AuthenticationPrincipal Jwt principal, @PathVariable UUID id) {
-    UUID userId = UUID.fromString(principal.getSubject());
+    var userId = UUID.fromString(principal.getSubject());
 
-    /* Vérifie la propriété de la règle */
+    // Vérifie la propriété de la règle
     var rule = ruleRepository.findById(id);
     if (rule.isEmpty() || !rule.get().userId().equals(userId)) {
       return ResponseEntity.notFound().build();
@@ -94,7 +94,7 @@ record AlertController(AlertRuleRepository ruleRepository, AlertEventRepository 
   @GetMapping("/events")
   List<AlertEventView> getEvents(
       @AuthenticationPrincipal Jwt principal, @RequestParam(defaultValue = "50") int limit) {
-    UUID userId = UUID.fromString(principal.getSubject());
+    var userId = UUID.fromString(principal.getSubject());
     return eventRepository.findRecentByUserId(userId, limit).stream()
         .map(
             event ->
@@ -112,10 +112,14 @@ record AlertController(AlertRuleRepository ruleRepository, AlertEventRepository 
    */
   @PostMapping("/events/{id}/read")
   ResponseEntity<Void> markAsRead(@AuthenticationPrincipal Jwt principal, @PathVariable UUID id) {
-    UUID userId = UUID.fromString(principal.getSubject());
+    var userId = UUID.fromString(principal.getSubject());
 
-    /* Vérifie la propriété de l'événement (le dépôt ne retourne pas findById, donc on ne peut pas vérifier) */
-    /* Pour la démo, on fait simplement l'update sans vérification (en production, ajouter une requête de vérification) */
+    // Vérifie la propriété de l'événement avant de le marquer comme lu
+    var event = eventRepository.findById(id);
+    if (event.isEmpty() || !event.get().userId().equals(userId)) {
+      return ResponseEntity.notFound().build();
+    }
+
     eventRepository.markAsRead(id);
     return ResponseEntity.noContent().build();
   }

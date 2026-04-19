@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Moteur d'alerte : écoute les événements de prix (QuoteTick) et évalue les règles. Sur
@@ -37,7 +36,6 @@ class AlertEngine {
 
   /** Écoute les événements QuoteTick et évalue toutes les règles pour ce ticker. */
   @ApplicationModuleListener
-  @Transactional
   void onQuoteTick(QuoteTick tick) {
     /* Récupère toutes les règles activées pour ce ticker */
     List<AlertRule> rules = ruleRepository.findEnabledByTicker(tick.ticker());
@@ -78,20 +76,19 @@ class AlertEngine {
    * l'utilisateur.
    */
   private void fireRule(AlertRule rule, QuoteTick tick) {
-    /* Crée et persiste l'événement d'alerte */
+    // Crée et persiste l'événement d'alerte (INSERT : id pré-généré, Persistable.isNew = true)
     var event =
-        new AlertEvent(
+        AlertEvent.newEvent(
             UUID.randomUUID(),
             rule.id(),
             rule.userId(),
             rule.ticker(),
             Instant.now(),
-            tick.price(),
-            null, /* delivered_at sera mis à jour par ReconnectHandler */
-            null);
+            tick.price());
     eventRepository.save(event);
 
-    /* Désactive la règle (comportement one-shot pour la démo) */
+    // Désactive la règle (UPDATE one-shot pour la démo). On passe par le constructeur standard
+    // (isNew = false) pour forcer un UPDATE plutôt qu'un INSERT.
     var disabledRule =
         new AlertRule(
             rule.id(),
