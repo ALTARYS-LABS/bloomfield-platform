@@ -1,7 +1,7 @@
 # Story Index: Bloomfield Terminal
 
 **Module**: bloomfield-terminal
-**Total stories**: 10
+**Total stories**: 11
 **Decomposed from**: `proto_v2_en.md` (Bloomfield Terminal v2 advanced model)
 **Product context**: Bloomfield Intelligence RFP AO_BI_2026_001 — BRVM real-time terminal (groupement IBEMS + ALTARYS LABS)
 **Date**: 18/04/2026
@@ -41,7 +41,8 @@ STORY-009 (Demo Hardening & v2 Release) ← depends on STORY-002 through STORY-0
 | 7 | STORY-007 | Alerts Module (Price Thresholds, WS Notifications, Offline Delivery) | STORY-003, STORY-004, STORY-005 | M | 🔲 Not started |
 | 8 | STORY-008 | TimescaleDB Hypertable & OHLCV History API | STORY-003, STORY-007 | M | 🔲 Not started |
 | 9 | STORY-009 | Demo Hardening & v2 Release | STORY-002–STORY-008 | S | 🔲 Not started |
-| 10 | STORY-010 | Sikafinance Historical Adapter (real BRVM data) | STORY-003, STORY-008 | M | 🔲 Not started |
+| 10 | STORY-010 | Sikafinance Historical Adapter (real BRVM data) | STORY-003, STORY-008 | M | ✅ Merged (PR #49) |
+| 11 | STORY-011 | Chart Window Label Honesty + Simulated Mode History Seeding | STORY-008, STORY-010 | S | 🔲 Not started |
 
 Complexity legend: **S** = ≤200 lines / ≤1 day · **M** = 200–400 lines / 1–2 days · **L** = 400–600 lines / 2–3 days (split if friction).
 
