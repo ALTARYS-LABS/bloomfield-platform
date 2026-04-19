@@ -21,12 +21,13 @@ All financial math uses BigDecimal. Positions and trades are simulated data seed
 ### Step 1 — New module `portfolio`
 ```
 com.bloomfield.terminal.portfolio
-├── api/              # PortfolioSummary, PositionView, PnL (DTOs)
-├── web/              # PortfolioController
+├── api/              # PortfolioController + DTOs (PortfolioSummary, PositionView, PnL)
+│   └── dto/          # request/response records
 ├── domain/           # Portfolio, Position, Trade
 ├── internal/         # repositories + PnlCalculator
 └── package-info.java # @ApplicationModule (allowed deps: user api, marketdata api)
 ```
+Package convention matches the `user` module (`api/` holds the controller and DTOs; `web/` is not used). Per refactor `7d4692a`.
 
 ### Step 2 — Flyway migration `V003__portfolio_module.sql`
 ```sql
@@ -77,10 +78,10 @@ All computations in `PnlCalculator`, pure function, easily unit-testable.
 All endpoints require auth; VIEWER and above allowed.
 
 ### Step 5 — WebSocket push
-Broadcast portfolio updates to `/user/queue/portfolio` every 2s (or on quote tick, whichever is simpler). STOMP user destinations require authenticated WS sessions — coordinate with STORY-005's WS auth header.
+Broadcast portfolio updates to `/user/queue/portfolio` every 2s (or on quote tick, whichever is simpler). STOMP user destinations rely on the authenticated WS session established by the `ChannelInterceptor` added in STORY-005 Step 0 — no additional WS auth work is needed here.
 
 ### Step 6 — Seed data
-A `V004__seed_demo_portfolio.sql` or a `@Profile("dev")` bean that seeds one portfolio with 4–5 positions for the first registered user. Document the demo user in README.
+**Moved to STORY-009.** Demo-user and demo-portfolio seeding is consolidated there under a single `@Profile("demo")` bean so all demo data lives in one place and ships only when the `demo` profile is active. This story creates empty tables; the portfolio becomes populated when a user signs up and makes a trade (or when STORY-009's demo profile runs).
 
 ### Step 7 — Frontend
 - New tab in Terminal: "Portfolio"
@@ -120,7 +121,6 @@ A `V004__seed_demo_portfolio.sql` or a `@Profile("dev")` bean that seeds one por
 
 - `backend/src/main/java/com/bloomfield/terminal/portfolio/**` (new)
 - `backend/src/main/resources/db/migration/V003__portfolio_module.sql` (new)
-- `backend/src/main/resources/db/migration/V004__seed_demo_portfolio.sql` (new)
 - `backend/src/test/java/com/bloomfield/terminal/portfolio/**` (new)
 - `frontend/src/components/PortfolioWidget.tsx` (new)
 - `frontend/src/pages/Terminal.tsx` (add tab)
