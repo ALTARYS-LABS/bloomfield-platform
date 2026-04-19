@@ -16,13 +16,15 @@ import java.math.RoundingMode;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 class SimulatedMarketDataProviderTest {
 
   private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
 
-  private static SimulatedMarketDataProvider buildProvider(SimpMessagingTemplate template) {
+  private static SimulatedMarketDataProvider buildProvider(
+      SimpMessagingTemplate template, ApplicationEventPublisher eventPublisher) {
     var seeds =
         List.of(
             new TickerSeed(
@@ -44,13 +46,14 @@ class SimulatedMarketDataProviderTest {
                 new BigDecimal("0.0"),
                 new BigDecimal("6.25")));
     var indices = new MarketIndicesProperties(new BigDecimal("234.56"), new BigDecimal("178.23"));
-    return new SimulatedMarketDataProvider(template, indices, new TickerSeedLoader(seeds));
+    return new SimulatedMarketDataProvider(
+        template, eventPublisher, indices, new TickerSeedLoader(seeds));
   }
 
   @Test
   void publishQuotesProducesCoherentOhlcAndAccuratePercentChange() {
     var template = mock(SimpMessagingTemplate.class);
-    var provider = buildProvider(template);
+    var provider = buildProvider(template, mock(ApplicationEventPublisher.class));
 
     // Run several ticks so price drifts away from open, giving meaningful high/low spread.
     for (int i = 0; i < 50; i++) {
@@ -87,7 +90,8 @@ class SimulatedMarketDataProviderTest {
 
   @Test
   void currentQuotesReflectsSeedTypeWithZeroInitialMovement() {
-    var provider = buildProvider(mock(SimpMessagingTemplate.class));
+    var provider =
+        buildProvider(mock(SimpMessagingTemplate.class), mock(ApplicationEventPublisher.class));
 
     List<Quote> quotes = provider.currentQuotes();
 
@@ -105,7 +109,8 @@ class SimulatedMarketDataProviderTest {
 
   @Test
   void historyReturnsCoherentCandles() {
-    var provider = buildProvider(mock(SimpMessagingTemplate.class));
+    var provider =
+        buildProvider(mock(SimpMessagingTemplate.class), mock(ApplicationEventPublisher.class));
 
     List<OhlcvCandle> candles = provider.history("ALPHA", 30);
 
@@ -119,7 +124,8 @@ class SimulatedMarketDataProviderTest {
 
   @Test
   void tickerStateReturnsEmptyForUnknownTicker() {
-    var provider = buildProvider(mock(SimpMessagingTemplate.class));
+    var provider =
+        buildProvider(mock(SimpMessagingTemplate.class), mock(ApplicationEventPublisher.class));
 
     assertThat(provider.tickerState("UNKNOWN")).isEmpty();
     assertThat(provider.tickerState("ALPHA")).isPresent();
@@ -129,7 +135,7 @@ class SimulatedMarketDataProviderTest {
   @Test
   void publishOrderBookBroadcastsFiveLevels() {
     var template = mock(SimpMessagingTemplate.class);
-    var provider = buildProvider(template);
+    var provider = buildProvider(template, mock(ApplicationEventPublisher.class));
 
     provider.publishOrderBook();
 
