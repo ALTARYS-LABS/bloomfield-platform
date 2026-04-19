@@ -126,6 +126,14 @@ docker compose up --build
 
 ### En développement (sans Docker)
 
+Pour le développement quotidien, on lance uniquement l'infrastructure (PostgreSQL/TimescaleDB) dans Docker, puis backend et frontend nativement pour profiter du hot-reload.
+
+**Infrastructure seule** — postgres uniquement :
+
+```bash
+docker compose up -d postgres
+```
+
 **Backend** — Java 25 requis :
 
 ```bash
