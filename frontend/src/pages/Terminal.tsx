@@ -10,9 +10,12 @@ import OrderBook from '../components/OrderBook';
 import IndicesWidget from '../components/IndicesWidget';
 import EmitterDetail from '../components/EmitterDetail';
 import PortfolioWidget from '../components/PortfolioWidget';
+import AlertsWidget from '../components/AlertsWidget';
+import AlertToasts from '../components/AlertToasts';
+import { useAlerts } from '../hooks/useAlerts';
 import type { CandleData } from '../types/market';
 
-type MobileTab = 'marche' | 'analyse' | 'portefeuille';
+type MobileTab = 'marche' | 'analyse' | 'portefeuille' | 'alertes';
 
 // Layouts react-grid-layout : le widget "portfolio" occupe la ligne du bas sur toute la largeur
 // afin de laisser la place au formulaire d'ordre et à la liste des positions.
@@ -55,6 +58,22 @@ export default function Terminal() {
   const [clock, setClock] = useState('');
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<MobileTab>('marche');
+  // Panneau d'alertes (slide-over) en desktop. Sur mobile, l'onglet "alertes"
+  // occupe la vue plein ecran et ce booleen est ignore.
+  const [alertsOpen, setAlertsOpen] = useState(false);
+
+  const {
+    rules: alertRules,
+    events: alertEvents,
+    loading: alertsLoading,
+    error: alertsError,
+    unreadCount: alertsUnread,
+    toasts: alertToasts,
+    createRule,
+    deleteRule,
+    markRead,
+    dismissToast,
+  } = useAlerts();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -102,6 +121,22 @@ export default function Terminal() {
           <span className="text-xs md:text-sm font-semibold text-text-primary hidden sm:inline">Bloomfield Terminal</span>
         </div>
         <div className="flex items-center gap-3 md:gap-4">
+          {/* Bouton cloche d'alertes : visible uniquement en desktop, le mobile passe par l'onglet dedie. */}
+          {!isMobile && (
+            <button
+              type="button"
+              onClick={() => setAlertsOpen((v) => !v)}
+              aria-label="Ouvrir les alertes"
+              className="relative text-text-secondary hover:text-text-primary text-base leading-none"
+            >
+              <span aria-hidden>⚑</span>
+              {alertsUnread > 0 && (
+                <span className="absolute -top-1 -right-2 bg-loss text-bg-primary text-[9px] font-mono px-1 rounded-full">
+                  {alertsUnread}
+                </span>
+              )}
+            </button>
+          )}
           <div className="flex items-center gap-1.5 text-[10px] md:text-xs">
             <span className={`w-2 h-2 rounded-full ${connected ? 'bg-gain pulse-dot' : 'bg-loss'}`} />
             <span className={`font-mono ${connected ? 'text-gain' : 'text-loss'}`}>
@@ -152,6 +187,23 @@ export default function Terminal() {
                 <PortfolioWidget availableTickers={availableTickers} />
               </div>
             )}
+            {activeTab === 'alertes' && (
+              <div className={`${widgetClass} h-[620px]`}>
+                <AlertsWidget
+                  rules={alertRules}
+                  events={alertEvents}
+                  loading={alertsLoading}
+                  error={alertsError}
+                  availableTickers={availableTickers}
+                  unreadCount={alertsUnread}
+                  onCreate={(ticker, operator, threshold) =>
+                    createRule({ ticker, operator, threshold })
+                  }
+                  onDelete={deleteRule}
+                  onMarkRead={markRead}
+                />
+              </div>
+            )}
           </div>
 
           {/* Bottom tab bar */}
@@ -179,6 +231,19 @@ export default function Terminal() {
             >
               <span className="text-base leading-none">💼</span>
               <span>Portef.</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('alertes')}
+              className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors relative
+                ${activeTab === 'alertes' ? 'text-accent border-t-2 border-accent -mt-px' : 'text-text-secondary'}`}
+            >
+              <span className="text-base leading-none">⚑</span>
+              <span>Alertes</span>
+              {alertsUnread > 0 && (
+                <span className="absolute top-1 right-2 bg-loss text-bg-primary text-[9px] font-mono px-1 rounded-full">
+                  {alertsUnread}
+                </span>
+              )}
             </button>
           </nav>
         </div>
@@ -214,6 +279,39 @@ export default function Terminal() {
           </ResponsiveGridLayout>
         </div>
       )}
+
+      {/* Panneau alertes desktop : slide-over a droite. Evite de re-dimensionner
+          la grille react-grid-layout qui est deja bien remplie. */}
+      {!isMobile && alertsOpen && (
+        <div className="fixed inset-0 z-40 flex">
+          <button
+            type="button"
+            aria-label="Fermer le panneau alertes"
+            className="flex-1 bg-black/40"
+            onClick={() => setAlertsOpen(false)}
+          />
+          <aside className="w-full max-w-md bg-bg-widget border-l border-border shadow-2xl">
+            <AlertsWidget
+              rules={alertRules}
+              events={alertEvents}
+              loading={alertsLoading}
+              error={alertsError}
+              availableTickers={availableTickers}
+              unreadCount={alertsUnread}
+              onCreate={(ticker, operator, threshold) =>
+                createRule({ ticker, operator, threshold })
+              }
+              onDelete={deleteRule}
+              onMarkRead={markRead}
+              onClose={() => setAlertsOpen(false)}
+            />
+          </aside>
+        </div>
+      )}
+
+      {/* Pile de toasts (desktop et mobile) : les nouveaux evenements declenches
+          tant que l'utilisateur ne regarde pas la liste sautent aux yeux. */}
+      <AlertToasts toasts={alertToasts} onDismiss={dismissToast} />
     </div>
   );
 }
