@@ -30,6 +30,15 @@ app:
     issuer: bloomfield-terminal
     access-ttl: PT15M
     refresh-ttl: P7D
+  auth:
+    # Refresh-token cookie. Dev defaults keep `secure=false` so http://localhost works;
+    # application-prod.yml overrides with `secure=true`.
+    refresh-cookie:
+      name: refresh_token
+      path: /auth
+      same-site: Strict
+      secure: false
+      max-age: P7D
 
 logging:
   level:
