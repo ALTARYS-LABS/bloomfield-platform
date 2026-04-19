@@ -16,9 +16,17 @@ services:
       timeout: 5s
       retries: 5
 
+  # Backend and frontend are gated behind the `app` profile.
+  # The committed `.env` sets COMPOSE_PROFILES=app so the default
+  # `docker compose up` behaviour (and Coolify deploys) is unchanged.
+  # Local devs running the backend natively via `./gradlew bootRun`
+  # can start postgres only with: `docker compose up -d postgres`.
   backend:
     build: ./backend
+    profiles: ["app"]
     restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -36,6 +44,7 @@ services:
 
   frontend:
     build: ./frontend
+    profiles: ["app"]
     ports:
       - "${FRONTEND_PORT:-3000}:80"
     restart: unless-stopped
