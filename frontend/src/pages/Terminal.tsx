@@ -13,6 +13,7 @@ import PortfolioWidget from '../components/PortfolioWidget';
 import AlertsWidget from '../components/AlertsWidget';
 import AlertToasts from '../components/AlertToasts';
 import { useAlerts } from '../hooks/useAlerts';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import type { CandleData } from '../types/market';
 
 type MobileTab = 'marche' | 'analyse' | 'portefeuille' | 'alertes';
@@ -97,6 +98,13 @@ export default function Terminal() {
   // fournir un prix d'exécution.
   const availableTickers = Array.from(quotes.keys()).sort();
 
+  // Refs d'accessibilite pour le slide-over : on piege le focus dans l'aside
+  // et on restaure le focus sur la cloche a la fermeture.
+  const bellRef = useRef<HTMLButtonElement>(null);
+  const slideOverRef = useRef<HTMLElement>(null);
+  const closeAlerts = useCallback(() => setAlertsOpen(false), []);
+  useFocusTrap(alertsOpen && !isMobile, slideOverRef, closeAlerts, bellRef);
+
   // Measure container width for react-grid-layout
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(window.innerWidth);
@@ -124,9 +132,12 @@ export default function Terminal() {
           {/* Bouton cloche d'alertes : visible uniquement en desktop, le mobile passe par l'onglet dedie. */}
           {!isMobile && (
             <button
+              ref={bellRef}
               type="button"
               onClick={() => setAlertsOpen((v) => !v)}
               aria-label="Ouvrir les alertes"
+              aria-expanded={alertsOpen}
+              aria-haspopup="dialog"
               className="relative text-text-secondary hover:text-text-primary text-base leading-none"
             >
               <span aria-hidden>⚑</span>
@@ -290,7 +301,14 @@ export default function Terminal() {
             className="flex-1 bg-black/40"
             onClick={() => setAlertsOpen(false)}
           />
-          <aside className="w-full max-w-md bg-bg-widget border-l border-border shadow-2xl">
+          <aside
+            ref={slideOverRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Panneau alertes"
+            tabIndex={-1}
+            className="w-full max-w-md bg-bg-widget border-l border-border shadow-2xl focus:outline-none"
+          >
             <AlertsWidget
               rules={alertRules}
               events={alertEvents}
