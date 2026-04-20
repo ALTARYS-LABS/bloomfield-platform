@@ -80,11 +80,11 @@ Basculer dans la fenêtre ADMIN déjà loguée. Ouvrir **Administration**:
 1. Liste des trois utilisateurs démo, rôles, statut enabled.
 2. Désactiver le VIEWER en un clic (toggle) — l'API répond 204.
 
-Ouvrir un nouvel onglet sur `http://<host>/actuator/modulith`:
+Afficher le rapport structurel des modules (généré à chaque build par `ApplicationModulesTest`):
 
-> « C'est la carte vivante des modules Spring Modulith. On y voit les dépendances autorisées entre `user`, `portfolio`, `alerts`, `marketdata`, et les événements qui circulent. La structure du code est validée à chaque build par `ApplicationModulesTest`. »
+> « La structure du code est validée à chaque build : quatre modules (`user`, `portfolio`, `alerts`, `marketdata`), dépendances autorisées déclarées dans chaque `package-info.java`, événements explicites. Toute violation casse la CI. »
 
-**Fallback** si le endpoint ne répond pas: « L'actuator modulith est expose par `spring-modulith-actuator` mais peut être désactivé en prod ; la vue est identique dans le rapport de tests `ModuleStructureReport`. »
+**Note**: l'endpoint live `/actuator/modulith` est temporairement désactivé (incompatibilité Modulith 2.0.0 + JDK 25 + fat jar), il sera ré-activé à la version patch suivante. La vue statique couvre le même message pour le jury.
 
 ## T+7:30 — Clôture (0:30)
 

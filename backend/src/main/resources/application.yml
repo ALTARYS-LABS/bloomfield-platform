@@ -64,9 +64,10 @@ management:
   endpoints:
     web:
       exposure:
-        # Exposition restreinte : /actuator/health (probe) et /actuator/modulith (carte
-        # des modules pour la démo RFP). Tout le reste reste désactivé par défaut.
-        include: health, modulith
+        # Exposition restreinte à /actuator/health (probe). L'endpoint
+        # /actuator/modulith est désactivé le temps d'un patch Modulith qui
+        # supporte JDK 25 + fat jar (cf. commentaire dans build.gradle.kts).
+        include: health
 
 logging:
   level:
