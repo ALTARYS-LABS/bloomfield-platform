@@ -37,7 +37,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.modulith:spring-modulith-starter-core")
     implementation("org.springframework.modulith:spring-modulith-starter-jdbc")
-    implementation("org.springframework.modulith:spring-modulith-actuator")
+    // spring-modulith-actuator retiré temporairement : en Modulith 2.0.0 + JDK 25,
+    // SpringModulithRuntimeAutoConfiguration bootstrap appelle ArchUnit 1.4.1 qui
+    // échoue à résoudre `com.bloomfield.terminal.alerts.package-info` via
+    // Class.forName() dans un fat jar (LaunchedURLClassLoader). Les tests passent
+    // parce qu'ils s'exécutent contre les classes explosées, pas le fat jar.
+    // Ré-évaluer avec Modulith ≥ 2.0.1 ou ArchUnit ≥ 1.5.
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.flywaydb:flyway-database-postgresql")

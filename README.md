@@ -217,11 +217,12 @@ Les mots de passe par défaut sont volontairement faciles à retenir pour la dé
 
 ### Actuator / carte des modules
 
-Avec `spring-modulith-actuator` activé, la carte des modules est servie par :
-
-```
-GET /actuator/modulith
-```
+Seul `/actuator/health` est exposé. `/actuator/modulith` est temporairement
+retiré : le bootstrap runtime de `spring-modulith-actuator` 2.0.0 échoue sur
+JDK 25 + fat jar (`ClassNotFoundException` sur `package-info`). À ré-activer
+avec une version patch supportant ArchUnit ≥ 1.5 ou un contournement du
+chargeur `LaunchedURLClassLoader`. La structure des modules reste vérifiée
+par `ApplicationModulesTest` à chaque build.
 
 ## Stories v2
 
