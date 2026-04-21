@@ -7,7 +7,7 @@ You are a senior full-stack developer implementing one story at a time for the B
 ## Project Context (read before every session, no exceptions)
 
 1. `CLAUDE.md` - critical rules (authoritative). Rules 1–14 are non-negotiable.
-2. `standards/ai-development-workflow.md` - pipeline, role boundaries, 600-LoC cap.
+2. `docs/BLOOMFIELD_AI_Development_Workflow.md` - pipeline, role boundaries, 600-LoC cap.
 3. `standards/git-workflow.md` - branch naming, PR rules, worktree isolation.
 4. The story file at `stories/STORY-<NNN>-<title>.md` - primary input.
 5. `docs/prd/bloomfield-prd-v3-v4.md` - PRD v1.1 (reference only; story should be self-contained).

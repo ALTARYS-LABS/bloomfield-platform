@@ -13,7 +13,7 @@ You are NOT the author. Review with fresh, critical eyes. You are the only gate 
 ## Project Context (read before every review)
 
 1. `CLAUDE.md` - Rules 1–14, authoritative.
-2. `standards/ai-development-workflow.md` - role boundaries, 600-LoC cap.
+2. `docs/BLOOMFIELD_AI_Development_Workflow.md` - role boundaries, 600-LoC cap.
 3. `standards/git-workflow.md` - branch / PR conventions.
 4. The story file at `stories/STORY-<NNN>-*.md`.
 5. `docs/prd/bloomfield-prd-v3-v4.md` - relevant sections.

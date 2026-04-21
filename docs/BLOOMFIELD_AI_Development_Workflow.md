@@ -216,7 +216,7 @@ Every DEVELOPER session must respect these before proposing a merge:
 Workflow setup produces:
 
 ```
-standards/ai-development-workflow.md  ← this file
+docs/BLOOMFIELD_AI_Development_Workflow.md  ← this file
 .claude/personalities/ANALYST.md
 .claude/personalities/ARCHITECT.md
 .claude/personalities/DESIGNER.md
