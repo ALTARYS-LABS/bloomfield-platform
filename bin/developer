@@ -1,4 +1,4 @@
 #!/bin/bash
-# ALTARYS ENTERPRISE — Developer (Step 5)
-# Implementation, one story file at a time
+# Bloomfield Terminal - Developer
+# Implementation, one story file at a time, PR <= 600 LoC.
 claude --system-prompt-file .claude/personalities/DEVELOPER.md "$@"
