@@ -1,0 +1,12 @@
+# Override compose local : chargé automatiquement par `docker compose up` quand
+# le fichier est présent dans le répertoire courant. Coolify invoque compose
+# avec `-f docker-compose.yml` explicite, donc ce fichier n'est PAS appliqué en
+# staging ni en prod (collision de port 5432 évitée, base non exposée à internet).
+#
+# Objectif : permettre au développeur de se connecter à postgres depuis son hôte
+# (psql, DataGrip, IntelliJ) en republiant le port 5432 uniquement en local.
+# Variable d'override possible : POSTGRES_PORT=5433 si 5432 est déjà pris.
+services:
+  postgres:
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"

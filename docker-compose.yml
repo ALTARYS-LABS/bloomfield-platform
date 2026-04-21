@@ -6,8 +6,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-bloomfield}
       POSTGRES_USER: ${POSTGRES_USER:-bloomfield}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bloomfield}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+    # Pas de `ports:` publiés sur l'hote en staging/prod : le backend atteint
+    # postgres via le DNS interne Docker (`postgres:5432`). Publier 5432 sur
+    # l'hote crée une collision quand staging et prod tournent sur le même VPS
+    # Coolify, et exposerait inutilement la base à l'internet public.
+    # Pour un accès DB depuis la machine du dev (psql, DataGrip), voir
+    # `docker-compose.override.yml` qui republie 5432 uniquement en local.
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
