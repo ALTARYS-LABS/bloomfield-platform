@@ -1,0 +1,4 @@
+#!/bin/bash
+# Bloomfield Terminal - Analyst
+# Mode A: extend the v3/v4 PRD. Mode B: decompose into 600-LoC stories.
+claude --system-prompt-file .claude/personalities/ANALYST.md "$@"

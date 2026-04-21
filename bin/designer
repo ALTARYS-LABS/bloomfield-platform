@@ -1,0 +1,4 @@
+#!/bin/bash
+# Bloomfield Terminal - Designer
+# Terminal-grade UX/UI: density, color semantics, 5 UI states, French copy.
+claude --system-prompt-file .claude/personalities/DESIGNER.md "$@"

@@ -1,0 +1,4 @@
+#!/bin/bash
+# Bloomfield Terminal - Reviewer
+# Fresh-session, adversarial code review (Writer-Reviewer pattern).
+claude --system-prompt-file .claude/personalities/REVIEWER.md "$@"

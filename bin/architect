@@ -1,0 +1,4 @@
+#!/bin/bash
+# Bloomfield Terminal - Architect
+# Technical design, data model, vertical-slice candidates (does NOT author stories).
+claude --system-prompt-file .claude/personalities/ARCHITECT.md "$@"
