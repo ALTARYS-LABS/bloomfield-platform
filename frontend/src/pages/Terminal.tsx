@@ -9,10 +9,17 @@ import CandlestickChart from '../components/CandlestickChart';
 import OrderBook from '../components/OrderBook';
 import IndicesWidget from '../components/IndicesWidget';
 import EmitterDetail from '../components/EmitterDetail';
+import PortfolioWidget from '../components/PortfolioWidget';
+import AlertsWidget from '../components/AlertsWidget';
+import AlertToasts from '../components/AlertToasts';
+import { useAlerts } from '../hooks/useAlerts';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import type { CandleData } from '../types/market';
 
-type MobileTab = 'marche' | 'analyse';
+type MobileTab = 'marche' | 'analyse' | 'portefeuille' | 'alertes';
 
+// Layouts react-grid-layout : le widget "portfolio" occupe la ligne du bas sur toute la largeur
+// afin de laisser la place au formulaire d'ordre et à la liste des positions.
 const layouts = {
   lg: [
     { i: 'table', x: 0, y: 0, w: 7, h: 4 },
@@ -20,6 +27,7 @@ const layouts = {
     { i: 'detail', x: 9, y: 0, w: 3, h: 4 },
     { i: 'chart', x: 0, y: 4, w: 7, h: 5 },
     { i: 'orderbook', x: 7, y: 4, w: 5, h: 5 },
+    { i: 'portfolio', x: 0, y: 9, w: 12, h: 5 },
   ],
   md: [
     { i: 'table', x: 0, y: 0, w: 6, h: 4 },
@@ -27,6 +35,7 @@ const layouts = {
     { i: 'detail', x: 9, y: 0, w: 3, h: 4 },
     { i: 'chart', x: 0, y: 4, w: 6, h: 5 },
     { i: 'orderbook', x: 6, y: 4, w: 6, h: 5 },
+    { i: 'portfolio', x: 0, y: 9, w: 12, h: 5 },
   ],
 };
 
@@ -42,11 +51,30 @@ function useIsMobile() {
 
 export default function Terminal() {
   const { connected, quotes, orderBooks, indices, fetchHistory } = useMarketData();
-  const [selectedTicker, setSelectedTicker] = useState('SGBCI');
+  // Default aligne sur le seed `data/brvm-tickers.yml` (code BRVM officiel SGBC,
+  // pas SGBCI), sinon les widgets graphique / carnet / detail emetteur restent
+  // vides au montage car le ticker n'existe pas cote backend.
+  const [selectedTicker, setSelectedTicker] = useState('SGBC');
   const [history, setHistory] = useState<CandleData[]>([]);
   const [clock, setClock] = useState('');
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<MobileTab>('marche');
+  // Panneau d'alertes (slide-over) en desktop. Sur mobile, l'onglet "alertes"
+  // occupe la vue plein ecran et ce booleen est ignore.
+  const [alertsOpen, setAlertsOpen] = useState(false);
+
+  const {
+    rules: alertRules,
+    events: alertEvents,
+    loading: alertsLoading,
+    error: alertsError,
+    unreadCount: alertsUnread,
+    toasts: alertToasts,
+    createRule,
+    deleteRule,
+    markRead,
+    dismissToast,
+  } = useAlerts();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -64,6 +92,18 @@ export default function Terminal() {
   }, [fetchHistory, selectedTicker]);
 
   const widgetClass = "bg-bg-widget rounded-lg border border-border overflow-hidden";
+
+  // Liste des tickers disponibles pour le formulaire d'ordre : dérivée des cotations
+  // déjà reçues, ainsi on n'expose que des valeurs pour lesquelles le backend saura
+  // fournir un prix d'exécution.
+  const availableTickers = Array.from(quotes.keys()).sort();
+
+  // Refs d'accessibilite pour le slide-over : on piege le focus dans l'aside
+  // et on restaure le focus sur la cloche a la fermeture.
+  const bellRef = useRef<HTMLButtonElement>(null);
+  const slideOverRef = useRef<HTMLElement>(null);
+  const closeAlerts = useCallback(() => setAlertsOpen(false), []);
+  useFocusTrap(alertsOpen && !isMobile, slideOverRef, closeAlerts, bellRef);
 
   // Measure container width for react-grid-layout
   const gridContainerRef = useRef<HTMLDivElement>(null);
@@ -89,6 +129,25 @@ export default function Terminal() {
           <span className="text-xs md:text-sm font-semibold text-text-primary hidden sm:inline">Bloomfield Terminal</span>
         </div>
         <div className="flex items-center gap-3 md:gap-4">
+          {/* Bouton cloche d'alertes : visible uniquement en desktop, le mobile passe par l'onglet dedie. */}
+          {!isMobile && (
+            <button
+              ref={bellRef}
+              type="button"
+              onClick={() => setAlertsOpen((v) => !v)}
+              aria-label="Ouvrir les alertes"
+              aria-expanded={alertsOpen}
+              aria-haspopup="dialog"
+              className="relative text-text-secondary hover:text-text-primary text-base leading-none"
+            >
+              <span aria-hidden>⚑</span>
+              {alertsUnread > 0 && (
+                <span className="absolute -top-1 -right-2 bg-loss text-bg-primary text-[9px] font-mono px-1 rounded-full">
+                  {alertsUnread}
+                </span>
+              )}
+            </button>
+          )}
           <div className="flex items-center gap-1.5 text-[10px] md:text-xs">
             <span className={`w-2 h-2 rounded-full ${connected ? 'bg-gain pulse-dot' : 'bg-loss'}`} />
             <span className={`font-mono ${connected ? 'text-gain' : 'text-loss'}`}>
@@ -111,7 +170,7 @@ export default function Terminal() {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Tab content */}
           <div className="flex-1 overflow-auto p-2 flex flex-col gap-2">
-            {activeTab === 'marche' ? (
+            {activeTab === 'marche' && (
               <>
                 <div className={`${widgetClass} h-[280px]`}>
                   <IndicesWidget indices={indices} />
@@ -123,7 +182,8 @@ export default function Terminal() {
                   <EmitterDetail ticker={selectedTicker} quote={quotes.get(selectedTicker)} />
                 </div>
               </>
-            ) : (
+            )}
+            {activeTab === 'analyse' && (
               <>
                 <div className={`${widgetClass} h-[420px]`}>
                   <CandlestickChart ticker={selectedTicker} history={history} latestQuote={quotes.get(selectedTicker)} />
@@ -132,6 +192,28 @@ export default function Terminal() {
                   <OrderBook orderBook={orderBooks.get(selectedTicker)} ticker={selectedTicker} />
                 </div>
               </>
+            )}
+            {activeTab === 'portefeuille' && (
+              <div className={`${widgetClass} h-[620px]`}>
+                <PortfolioWidget availableTickers={availableTickers} />
+              </div>
+            )}
+            {activeTab === 'alertes' && (
+              <div className={`${widgetClass} h-[620px]`}>
+                <AlertsWidget
+                  rules={alertRules}
+                  events={alertEvents}
+                  loading={alertsLoading}
+                  error={alertsError}
+                  availableTickers={availableTickers}
+                  unreadCount={alertsUnread}
+                  onCreate={(ticker, operator, threshold) =>
+                    createRule({ ticker, operator, threshold })
+                  }
+                  onDelete={deleteRule}
+                  onMarkRead={markRead}
+                />
+              </div>
             )}
           </div>
 
@@ -152,6 +234,27 @@ export default function Terminal() {
             >
               <span className="text-base leading-none">📈</span>
               <span>Analyse</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('portefeuille')}
+              className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors
+                ${activeTab === 'portefeuille' ? 'text-accent border-t-2 border-accent -mt-px' : 'text-text-secondary'}`}
+            >
+              <span className="text-base leading-none">💼</span>
+              <span>Portef.</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('alertes')}
+              className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors relative
+                ${activeTab === 'alertes' ? 'text-accent border-t-2 border-accent -mt-px' : 'text-text-secondary'}`}
+            >
+              <span className="text-base leading-none">⚑</span>
+              <span>Alertes</span>
+              {alertsUnread > 0 && (
+                <span className="absolute top-1 right-2 bg-loss text-bg-primary text-[9px] font-mono px-1 rounded-full">
+                  {alertsUnread}
+                </span>
+              )}
             </button>
           </nav>
         </div>
@@ -181,9 +284,52 @@ export default function Terminal() {
             <div key="detail" className={widgetClass}>
               <EmitterDetail ticker={selectedTicker} quote={quotes.get(selectedTicker)} />
             </div>
+            <div key="portfolio" className={widgetClass}>
+              <PortfolioWidget availableTickers={availableTickers} />
+            </div>
           </ResponsiveGridLayout>
         </div>
       )}
+
+      {/* Panneau alertes desktop : slide-over a droite. Evite de re-dimensionner
+          la grille react-grid-layout qui est deja bien remplie. */}
+      {!isMobile && alertsOpen && (
+        <div className="fixed inset-0 z-40 flex">
+          <button
+            type="button"
+            aria-label="Fermer le panneau alertes"
+            className="flex-1 bg-black/40"
+            onClick={() => setAlertsOpen(false)}
+          />
+          <aside
+            ref={slideOverRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Panneau alertes"
+            tabIndex={-1}
+            className="w-full max-w-md bg-bg-widget border-l border-border shadow-2xl focus:outline-none"
+          >
+            <AlertsWidget
+              rules={alertRules}
+              events={alertEvents}
+              loading={alertsLoading}
+              error={alertsError}
+              availableTickers={availableTickers}
+              unreadCount={alertsUnread}
+              onCreate={(ticker, operator, threshold) =>
+                createRule({ ticker, operator, threshold })
+              }
+              onDelete={deleteRule}
+              onMarkRead={markRead}
+              onClose={() => setAlertsOpen(false)}
+            />
+          </aside>
+        </div>
+      )}
+
+      {/* Pile de toasts (desktop et mobile) : les nouveaux evenements declenches
+          tant que l'utilisateur ne regarde pas la liste sautent aux yeux. */}
+      <AlertToasts toasts={alertToasts} onDismiss={dismissToast} />
     </div>
   );
 }

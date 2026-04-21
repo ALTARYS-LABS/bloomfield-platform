@@ -126,6 +126,14 @@ docker compose up --build
 
 ### En développement (sans Docker)
 
+Pour le développement quotidien, on lance uniquement l'infrastructure (PostgreSQL/TimescaleDB) dans Docker, puis backend et frontend nativement pour profiter du hot-reload.
+
+**Infrastructure seule** — postgres uniquement :
+
+```bash
+docker compose up -d postgres
+```
+
 **Backend** — Java 25 requis :
 
 ```bash
@@ -154,6 +162,80 @@ curl http://localhost:8080/api/health
 # Historique d'un titre
 curl http://localhost:8080/api/brvm/history/SGBCI
 ```
+
+---
+
+## Architecture v2 (Modulith, auth, portfolio, alerts, TimescaleDB)
+
+```
+                ┌─────────────────────────────────────────────────────┐
+                │           React 19 + TS (Vite, Tailwind, STOMP)     │
+                └──────────────────────┬──────────────────────────────┘
+                                       │ HTTPS + cookies (refresh) + Bearer JWT (access)
+                ┌──────────────────────▼──────────────────────────────┐
+                │      Spring Boot 4.0 (Modulith + Spring Security)   │
+                │                                                      │
+                │   user ◀──UserDirectory──▶ portfolio ──events──▶ alerts
+                │     │                       │                    │
+                │     │ JWT HS256 + refresh   │ Spring Data JDBC   │ @ApplicationModuleListener
+                │     ▼                       ▼                    ▼
+                │   users / refresh_tokens   portfolios/positions/trades   alert_rules/events
+                │                                                      │
+                │   marketdata (SimulatedMarketDataProvider + candles)│
+                │     │                                                │
+                │     ▼                                                │
+                │   ohlcv (TimescaleDB hypertable)                    │
+                └───────────────────────────┬──────────────────────────┘
+                                            │
+                                       PostgreSQL 17 + TimescaleDB
+```
+
+Détail par module : voir `stories/STORY-002` à `STORY-008`.
+
+## Lancer la démo seedée (profil `demo`)
+
+Le profil `demo` active trois `ApplicationRunner` idempotents qui créent :
+
+- trois comptes utilisateur (ADMIN, ANALYST, VIEWER) ;
+- un portefeuille ANALYST avec 6 positions BRVM ;
+- trois règles d'alerte dimensionnées pour qu'au moins une se déclenche en ~10 min.
+
+```bash
+docker compose up -d postgres
+cd backend && SPRING_PROFILES_ACTIVE=demo ./gradlew bootRun
+```
+
+### Demo credentials
+
+Les mots de passe par défaut sont volontairement faciles à retenir pour la démo. En prod, surcharger via variables d'environnement (`DEMO_USERS_ADMIN_PASSWORD`, etc.) ou désactiver le profil `demo`.
+
+| Rôle    | Email                       | Mot de passe par défaut     |
+|---------|-----------------------------|-----------------------------|
+| ADMIN   | `admin@altaryslabs.com`     | `ChangeMe!Admin2026`        |
+| ANALYST | `analyst@demo.bloomfield`   | `ChangeMe!Analyst2026`      |
+| VIEWER  | `viewer@demo.bloomfield`    | `ChangeMe!Viewer2026`       |
+
+### Actuator / carte des modules
+
+Seul `/actuator/health` est exposé. `/actuator/modulith` est temporairement
+retiré : le bootstrap runtime de `spring-modulith-actuator` 2.0.0 échoue sur
+JDK 25 + fat jar (`ClassNotFoundException` sur `package-info`). À ré-activer
+avec une version patch supportant ArchUnit ≥ 1.5 ou un contournement du
+chargeur `LaunchedURLClassLoader`. La structure des modules reste vérifiée
+par `ApplicationModulesTest` à chaque build.
+
+## Stories v2
+
+- [STORY-002 : Persistence & Modulith skeleton](stories/STORY-002-persistence-and-modulith-skeleton.md)
+- [STORY-003 : Market data provider & 45 tickers](stories/STORY-003-market-data-provider-and-45-tickers.md)
+- [STORY-004 : User module backend auth](stories/STORY-004-user-module-backend-auth.md)
+- [STORY-005 : User module frontend login](stories/STORY-005-user-module-frontend-login.md)
+- [STORY-006 : Portfolio module](stories/STORY-006-portfolio-module.md)
+- [STORY-007 : Alerts module](stories/STORY-007-alerts-module.md)
+- [STORY-008 : TimescaleDB OHLCV history](stories/STORY-008-timescaledb-ohlcv-history.md)
+- [STORY-009 : Demo hardening & v2 release](stories/STORY-009-demo-hardening-and-release.md)
+
+Voir aussi [`DEPLOYMENT_GUIDE.md`](DEPLOYMENT_GUIDE.md) pour les variables d'environnement et le déploiement Coolify.
 
 ---
 

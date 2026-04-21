@@ -1,0 +1,398 @@
+# BRVM listed securities - seed data for the SimulatedMarketDataProvider.
+#
+# The 45 entries below cover the ~45 securities listed on the Bourse Regionale
+# des Valeurs Mobilieres (UEMOA). Tickers and company names follow the public
+# BRVM listing; financial figures (openPrice, marketCap, per, dividendYield)
+# are realistic placeholders per sector, suitable for the v2 RFP prototype.
+#
+# openPrice is in XOF. marketCap is in XOF. per is a ratio. dividendYield is
+# a percentage.
+#
+# TODO: verify against official BRVM reference (https://www.brvm.org) before
+# production release. Bond reference prices and yields in particular should be
+# replaced by the real coupon / nominal values.
+#
+# type values: equity | bond
+# sector values: Finance, Agriculture, Industrie, Distribution, Services Publics,
+#                Telecoms, Energie, Transport, Autres, Obligations
+
+tickers:
+  # Finance (10)
+  - ticker: SGBC
+    name: Societe Generale Cote d'Ivoire
+    sector: Finance
+    type: equity
+    openPrice: 12500.00
+    marketCap: 1250000000000
+    per: 12.5
+    dividendYield: 4.2
+  - ticker: BICC
+    name: BICI Cote d'Ivoire
+    sector: Finance
+    type: equity
+    openPrice: 6800.00
+    marketCap: 680000000000
+    per: 11.2
+    dividendYield: 4.8
+  - ticker: BOAB
+    name: BOA Benin
+    sector: Finance
+    type: equity
+    openPrice: 5600.00
+    marketCap: 560000000000
+    per: 10.2
+    dividendYield: 4.8
+  - ticker: BOAC
+    name: BOA Cote d'Ivoire
+    sector: Finance
+    type: equity
+    openPrice: 5200.00
+    marketCap: 520000000000
+    per: 10.4
+    dividendYield: 5.0
+  - ticker: BOAM
+    name: BOA Mali
+    sector: Finance
+    type: equity
+    openPrice: 3800.00
+    marketCap: 190000000000
+    per: 9.1
+    dividendYield: 5.6
+  - ticker: BOAN
+    name: BOA Niger
+    sector: Finance
+    type: equity
+    openPrice: 4100.00
+    marketCap: 205000000000
+    per: 9.8
+    dividendYield: 5.4
+  - ticker: BOAS
+    name: BOA Senegal
+    sector: Finance
+    type: equity
+    openPrice: 4400.00
+    marketCap: 220000000000
+    per: 10.0
+    dividendYield: 5.1
+  - ticker: ECOC
+    name: Ecobank Cote d'Ivoire
+    sector: Finance
+    type: equity
+    openPrice: 7800.00
+    marketCap: 780000000000
+    per: 8.7
+    dividendYield: 5.5
+  - ticker: NSBC
+    name: NSIA Banque Cote d'Ivoire
+    sector: Finance
+    type: equity
+    openPrice: 6200.00
+    marketCap: 310000000000
+    per: 10.5
+    dividendYield: 4.7
+  - ticker: SIBC
+    name: SIB Cote d'Ivoire
+    sector: Finance
+    type: equity
+    openPrice: 5100.00
+    marketCap: 510000000000
+    per: 9.5
+    dividendYield: 6.0
+
+  # Agriculture (5)
+  - ticker: PALC
+    name: Palm Cote d'Ivoire
+    sector: Agriculture
+    type: equity
+    openPrice: 4900.00
+    marketCap: 490000000000
+    per: 15.3
+    dividendYield: 2.8
+  - ticker: SAPH
+    name: Societe Africaine de Plantations d'Heveas
+    sector: Agriculture
+    type: equity
+    openPrice: 3600.00
+    marketCap: 180000000000
+    per: 13.4
+    dividendYield: 3.5
+  - ticker: SOGC
+    name: SOGB
+    sector: Agriculture
+    type: equity
+    openPrice: 4200.00
+    marketCap: 210000000000
+    per: 14.0
+    dividendYield: 3.2
+  - ticker: SCRC
+    name: Sucrivoire
+    sector: Agriculture
+    type: equity
+    openPrice: 3100.00
+    marketCap: 155000000000
+    per: 12.6
+    dividendYield: 3.9
+  - ticker: SICC
+    name: Sicor
+    sector: Agriculture
+    type: equity
+    openPrice: 2800.00
+    marketCap: 140000000000
+    per: 11.8
+    dividendYield: 4.1
+
+  # Industrie (8)
+  - ticker: UNLC
+    name: Unilever Cote d'Ivoire
+    sector: Industrie
+    type: equity
+    openPrice: 14200.00
+    marketCap: 710000000000
+    per: 16.5
+    dividendYield: 3.1
+  - ticker: NTLC
+    name: Nestle Cote d'Ivoire
+    sector: Industrie
+    type: equity
+    openPrice: 15800.00
+    marketCap: 790000000000
+    per: 17.2
+    dividendYield: 2.8
+  - ticker: SITC
+    name: SITAB
+    sector: Industrie
+    type: equity
+    openPrice: 6200.00
+    marketCap: 310000000000
+    per: 13.1
+    dividendYield: 4.0
+  - ticker: SLBC
+    name: SOLIBRA
+    sector: Industrie
+    type: equity
+    openPrice: 8400.00
+    marketCap: 420000000000
+    per: 14.3
+    dividendYield: 3.6
+  - ticker: SMBC
+    name: SMB Cote d'Ivoire
+    sector: Industrie
+    type: equity
+    openPrice: 4100.00
+    marketCap: 205000000000
+    per: 11.7
+    dividendYield: 4.5
+  - ticker: FTSC
+    name: Filtisac Cote d'Ivoire
+    sector: Industrie
+    type: equity
+    openPrice: 3700.00
+    marketCap: 185000000000
+    per: 12.2
+    dividendYield: 4.3
+  - ticker: TRIC
+    name: Tractafric Motors Cote d'Ivoire
+    sector: Industrie
+    type: equity
+    openPrice: 2900.00
+    marketCap: 145000000000
+    per: 11.0
+    dividendYield: 4.8
+  - ticker: AIRB
+    name: Air Liquide Cote d'Ivoire
+    sector: Industrie
+    type: equity
+    openPrice: 11200.00
+    marketCap: 560000000000
+    per: 15.5
+    dividendYield: 3.3
+
+  # Distribution (5)
+  - ticker: CABC
+    name: CAB Cote d'Ivoire
+    sector: Distribution
+    type: equity
+    openPrice: 1150.00
+    marketCap: 115000000000
+    per: 7.9
+    dividendYield: 6.5
+  - ticker: BNBC
+    name: Bernabe Cote d'Ivoire
+    sector: Distribution
+    type: equity
+    openPrice: 2400.00
+    marketCap: 120000000000
+    per: 10.6
+    dividendYield: 5.2
+  - ticker: CFAC
+    name: CFAO Motors Cote d'Ivoire
+    sector: Distribution
+    type: equity
+    openPrice: 3300.00
+    marketCap: 165000000000
+    per: 11.4
+    dividendYield: 4.9
+  - ticker: PRSC
+    name: Presitel
+    sector: Distribution
+    type: equity
+    openPrice: 1850.00
+    marketCap: 92500000000
+    per: 9.3
+    dividendYield: 5.8
+  - ticker: VIVC
+    name: Vivo Energy Cote d'Ivoire
+    sector: Distribution
+    type: equity
+    openPrice: 2750.00
+    marketCap: 137500000000
+    per: 10.1
+    dividendYield: 5.0
+
+  # Services Publics (2)
+  - ticker: CIEC
+    name: CIE Cote d'Ivoire
+    sector: Services Publics
+    type: equity
+    openPrice: 4600.00
+    marketCap: 230000000000
+    per: 12.8
+    dividendYield: 4.4
+  - ticker: SDSC
+    name: SODECI
+    sector: Services Publics
+    type: equity
+    openPrice: 5200.00
+    marketCap: 260000000000
+    per: 13.5
+    dividendYield: 4.1
+
+  # Telecoms (2)
+  - ticker: SNTS
+    name: Sonatel
+    sector: Telecoms
+    type: equity
+    openPrice: 18900.00
+    marketCap: 1890000000000
+    per: 14.2
+    dividendYield: 3.8
+  - ticker: ONTBF
+    name: Onatel Burkina Faso
+    sector: Telecoms
+    type: equity
+    openPrice: 4200.00
+    marketCap: 420000000000
+    per: 10.8
+    dividendYield: 5.1
+
+  # Energie (3)
+  - ticker: TTLC
+    name: Total Cote d'Ivoire
+    sector: Energie
+    type: equity
+    openPrice: 2500.00
+    marketCap: 125000000000
+    per: 10.7
+    dividendYield: 4.6
+  - ticker: TTLS
+    name: Total Senegal
+    sector: Energie
+    type: equity
+    openPrice: 2350.00
+    marketCap: 117500000000
+    per: 11.0
+    dividendYield: 4.5
+  - ticker: SHEC
+    name: Shell Cote d'Ivoire
+    sector: Energie
+    type: equity
+    openPrice: 2800.00
+    marketCap: 140000000000
+    per: 11.3
+    dividendYield: 4.4
+
+  # Transport (2)
+  - ticker: ABJC
+    name: Bollore Transport Cote d'Ivoire
+    sector: Transport
+    type: equity
+    openPrice: 3400.00
+    marketCap: 170000000000
+    per: 11.9
+    dividendYield: 4.3
+  - ticker: MOVC
+    name: Movis Cote d'Ivoire
+    sector: Transport
+    type: equity
+    openPrice: 2100.00
+    marketCap: 105000000000
+    per: 10.2
+    dividendYield: 5.0
+
+  # Autres (6)
+  - ticker: STAC
+    name: SETAO Cote d'Ivoire
+    sector: Autres
+    type: equity
+    openPrice: 1600.00
+    marketCap: 80000000000
+    per: 8.6
+    dividendYield: 6.1
+  - ticker: SVOC
+    name: Servair Abidjan
+    sector: Autres
+    type: equity
+    openPrice: 2200.00
+    marketCap: 110000000000
+    per: 9.8
+    dividendYield: 5.4
+  - ticker: NEIC
+    name: Crown SIEM Cote d'Ivoire
+    sector: Autres
+    type: equity
+    openPrice: 1950.00
+    marketCap: 97500000000
+    per: 9.5
+    dividendYield: 5.6
+  - ticker: SEMC
+    name: CIMAF Cote d'Ivoire
+    sector: Autres
+    type: equity
+    openPrice: 5800.00
+    marketCap: 290000000000
+    per: 13.0
+    dividendYield: 4.0
+  - ticker: SDCC
+    name: SDC Cote d'Ivoire
+    sector: Autres
+    type: equity
+    openPrice: 6200.00
+    marketCap: 620000000000
+    per: 13.1
+    dividendYield: 3.2
+  - ticker: SNOC
+    name: SONA Cote d'Ivoire
+    sector: Autres
+    type: equity
+    openPrice: 2700.00
+    marketCap: 135000000000
+    per: 10.5
+    dividendYield: 5.0
+
+  # Obligations / Bonds (2)
+  - ticker: TPCI25
+    name: Tresor Public CI Obligation 2025
+    sector: Obligations
+    type: bond
+    openPrice: 10050.00
+    marketCap: 250000000000
+    per: 0.0
+    dividendYield: 6.25
+  - ticker: BOAD26
+    name: BOAD Obligation 2026
+    sector: Obligations
+    type: bond
+    openPrice: 10200.00
+    marketCap: 150000000000
+    per: 0.0
+    dividendYield: 6.50

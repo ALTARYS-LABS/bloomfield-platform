@@ -2,6 +2,27 @@ app:
   cors:
     allowed-origins:
       - "https://bloomfield-intelligence.altaryslabs.com"
+  auth:
+    refresh-cookie:
+      secure: true
+
+# Durcissement prod : on évite toute fuite de stack-trace / message vers le client,
+# on plafonne la pool Hikari pour la démo (dimensionnement raisonnable pour le RFP)
+# et on ne montre les détails du health endpoint qu'aux utilisateurs authentifiés.
+server:
+  error:
+    include-stacktrace: never
+    include-message: never
+
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 10
+
+management:
+  endpoint:
+    health:
+      show-details: when-authorized
 
 logging:
   level:

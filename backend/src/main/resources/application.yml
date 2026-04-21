@@ -4,16 +4,77 @@ server:
 spring:
   application:
     name: bloomfield-terminal
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/bloomfield}
+    username: ${SPRING_DATASOURCE_USERNAME:bloomfield}
+    password: ${SPRING_DATASOURCE_PASSWORD:bloomfield}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  sql:
+    init:
+      mode: never
+  modulith:
+    events:
+      # Cadence QuoteTick = 1/s × tous les tickers, donc `event_publication`
+      # grossit vite si on garde les lignes terminees (mode `update` par defaut).
+      # `delete` supprime la ligne au commit du listener (`AlertEngine.onQuoteTick`)
+      # et ne laisse dans la table que les evenements non-completes (listener qui
+      # a jete), ce qui en fait une "queue des echecs" directement diagnostiquable.
+      completion-mode: delete
 
 market:
   indices:
     composite-base: 234.56
     brvm10-base: 178.23
 
+
 app:
+  marketdata:
+    # `simulated` = bougies live produites par l'agrégateur en mémoire (défaut hermétique).
+    # `sikafinance` = remplissage paresseux de l'hypertable depuis l'endpoint public Sikafinance.
+    history-source: ${APP_MARKETDATA_HISTORY_SOURCE:simulated}
+    simulated:
+      # Pré-seed d'historique synthétique (30 jours ouvrés par ticker) au démarrage. Désactivé par
+      # défaut pour garder CI et prod déterministes ; `application-demo.yml` flippe le flag pour
+      # que la démo affiche un graphique crédible immédiatement.
+      seed-history-days: ${APP_MARKETDATA_SIMULATED_SEED_HISTORY_DAYS:false}
+      seed-days: 30
+      daily-volatility: 0.01
+    sikafinance:
+      base-url: https://www.sikafinance.com
+      user-agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0"
+      request-spacing-ms: 150
+      max-window-days: 89
+      connect-timeout: 5s
+      read-timeout: 15s
   cors:
     allowed-origins:
       - "http://localhost:5173"
+  jwt:
+    secret: ${APP_JWT_SECRET:dev-insecure-secret-change-me-xxxxxxxxxxxxxxxx}
+    issuer: bloomfield-terminal
+    access-ttl: PT15M
+    refresh-ttl: P7D
+  auth:
+    # Refresh-token cookie. Dev defaults keep `secure=false` so http://localhost works;
+    # application-prod.yml overrides with `secure=true`.
+    refresh-cookie:
+      name: refresh_token
+      path: /auth
+      same-site: Strict
+      secure: false
+      max-age: P7D
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # Exposition restreinte à /actuator/health (probe). L'endpoint
+        # /actuator/modulith est désactivé le temps d'un patch Modulith qui
+        # supporte JDK 25 + fat jar (cf. commentaire dans build.gradle.kts).
+        include: health
 
 logging:
   level:

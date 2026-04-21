@@ -1,0 +1,8 @@
+# Profil démo : active par commodité le pré-seed d'historique simulé pour qu'une session
+# `SPRING_PROFILES_ACTIVE=demo` présente un graphique plausible dès le premier chargement.
+# Le flag reste standalone (déclaré dans application.yml) et peut être activé hors profil démo
+# via la variable d'environnement APP_MARKETDATA_SIMULATED_SEED_HISTORY_DAYS=true.
+app:
+  marketdata:
+    simulated:
+      seed-history-days: true

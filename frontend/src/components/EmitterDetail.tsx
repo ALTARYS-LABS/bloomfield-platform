@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { apiJson } from '../api/client';
 import type { EmitterInfo, Quote } from '../types/market';
 
 interface Props {
@@ -6,14 +7,35 @@ interface Props {
   quote?: Quote;
 }
 
+// Reponse backend pour un ticker inconnu: `{ "error": "Ticker not found" }`.
+// On filtre cette forme pour retomber sur l'etat "Selectionnez un ticker"
+// plutot que de rendre un bloc avec champs undefined.
+type EmitterResponse = EmitterInfo | { error: string };
+
+function isEmitterInfo(r: EmitterResponse): r is EmitterInfo {
+  return (r as EmitterInfo).name !== undefined;
+}
+
 export default function EmitterDetail({ ticker, quote }: Props) {
   const [info, setInfo] = useState<EmitterInfo | null>(null);
 
   useEffect(() => {
-    fetch(`/api/brvm/emitters/${ticker}`)
-      .then(r => r.json())
-      .then(setInfo)
-      .catch(() => setInfo(null));
+    if (!ticker) return;
+    let cancelled = false;
+    // `apiJson` injecte le header Authorization: Bearer <jwt>. Sans lui, la
+    // requete repartait avec un 401 silencieux et la fiche emetteur restait
+    // bloquee sur "Selectionnez un ticker" meme apres un clic de ligne.
+    apiJson<EmitterResponse>(`/api/brvm/emitters/${ticker}`)
+      .then(r => {
+        if (cancelled) return;
+        setInfo(isEmitterInfo(r) ? r : null);
+      })
+      .catch(() => {
+        if (!cancelled) setInfo(null);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [ticker]);
 
   const formatCap = (v: number) => {

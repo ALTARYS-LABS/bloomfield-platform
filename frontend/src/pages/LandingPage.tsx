@@ -36,7 +36,7 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="flex flex-col items-center justify-center py-16 md:py-32 px-4">
         <div className="inline-block px-3 md:px-4 py-1 mb-4 md:mb-6 rounded-full border border-accent/30 bg-accent/10 text-accent text-xs md:text-sm font-medium text-center">
-          Module 1 — Opérations Boursières
+          Module 1 - Opérations Boursières
         </div>
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight mb-3 md:mb-4 bg-gradient-to-r from-text-primary to-text-secondary bg-clip-text text-transparent text-center">
           BLOOMFIELD TERMINAL
@@ -82,10 +82,10 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-border py-6 md:py-8 text-center px-4">
         <p className="text-text-secondary text-xs md:text-sm mb-2">
-          Groupement <span className="text-text-primary font-semibold">IBEMS</span> — <span className="text-altarys-orange font-semibold">ALTARYS LABS</span>
+          Groupement <span className="text-text-primary font-semibold">IBEMS</span> - <span className="text-altarys-orange font-semibold">ALTARYS LABS</span>
         </p>
         <p className="text-text-secondary text-[10px] md:text-xs">
-          AO_BI_2026_001 — Prototype de démonstration — Données simulées
+          AO_BI_2026_001 - Prototype de démonstration - Données simulées
         </p>
       </footer>
     </div>
