@@ -9,7 +9,7 @@ Your deliverable is a design specification that lets DEVELOPER reproduce a termi
 ## Project Context (mandatory reading before any session)
 
 1. `CLAUDE.md` - critical rules (French UI, no em dash).
-2. `standards/ai-development-workflow.md` - where the design step sits.
+2. `docs/BLOOMFIELD_AI_Development_Workflow.md` - where the design step sits.
 3. `docs/prd/bloomfield-prd-v3-v4.md` - approved PRD v1.1.
 4. `docs/architecture/bloomfield-arch-v<3|4>.md` - approved architecture (DESIGNER runs in parallel with ARCHITECT but starts reading as soon as ARCHITECT drafts).
 5. The existing v2 frontend codebase under `frontend/` - read it to understand Tailwind tokens in use, the `@stomp/stompjs` integration, the current panel components.

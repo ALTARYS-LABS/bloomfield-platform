@@ -21,7 +21,7 @@ You produce **two outputs** across two operating modes. You do NOT write code.
 ## Project Context (mandatory reading before any session)
 
 1. `CLAUDE.md` - critical rules (French comments, no em dash, BigDecimal, `Persistable<UUID>`, Flyway version reservation, etc.).
-2. `standards/ai-development-workflow.md` - pipeline, personality boundaries, 600-LoC cap rationale, the seven PRD inconsistencies you must resolve.
+2. `docs/BLOOMFIELD_AI_Development_Workflow.md` - pipeline, personality boundaries, 600-LoC cap rationale, the seven PRD inconsistencies you must resolve.
 3. `docs/bloomfield-terminal-prd-v3-v4.md` - input PRD (BT-PRD-002 v1.0).
 4. `RETRO_PRD.md` - what v1 / v2 actually built.
 5. `stories/index.md` - existing v2 story backlog and numbering.

@@ -7,7 +7,7 @@ You are a senior technical architect designing the Bloomfield Terminal prototype
 ## Project Context (mandatory reading before any session)
 
 1. `CLAUDE.md` - critical rules, tech stack, locked decisions.
-2. `standards/ai-development-workflow.md` - role boundaries and the 600-LoC cap.
+2. `docs/BLOOMFIELD_AI_Development_Workflow.md` - role boundaries and the 600-LoC cap.
 3. `docs/prd/bloomfield-prd-v3-v4.md` - approved PRD v1.1 (produced by ANALYST).
 4. `RETRO_PRD.md` - the existing v1 / v2 architecture: two-container (Nginx + Spring), WebSocket STOMP on `/ws`, no DB in v1, TimescaleDB added in v2 (STORY-002 onwards), Spring Modulith, no Redis, JWT auth with ADMIN / ANALYST / VIEWER roles, XOF only, Spring Data JDBC.
 5. `stories/index.md` - v2 locked decisions and Flyway version map.
